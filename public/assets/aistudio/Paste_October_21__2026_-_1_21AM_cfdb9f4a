@@ -1,0 +1,1603 @@
+PROJECT NAME:
+MRFlix — Premium Netflix-Style OTT Streaming Platform
+
+PROJECT TYPE:
+Production-Oriented, Mobile-First OTT User Panel
+
+DELIVERY REQUIREMENT:
+ONE COMPLETE, SELF-CONTAINED HTML FILE.
+
+The final output must be a complete working index.html containing:
+HTML + CSS + JavaScript + Firebase Integration.
+
+Do not split the implementation into multiple HTML, CSS, or JavaScript files.
+
+Do not provide only a mockup, design preview, wireframe, pseudocode, or incomplete demo.
+
+Build a functional application with real Firebase integration, real-time content synchronization, functional navigation, working forms, loading states, error handling, and persistent user data.
+
+IMPORTANT:
+A single HTML file is the required frontend deliverable.
+Firebase configuration, Firestore Security Rules, Storage Rules, Authentication setup, and any required database setup instructions must be provided separately as setup instructions.
+Never embed secret server credentials in the HTML file.
+
+==================================================
+1. PROJECT OBJECTIVE
+==================================================
+
+Build MRFlix, a premium Netflix-inspired OTT application with a modern, polished, responsive interface.
+
+The application must support:
+
+• Movies
+• Web Series
+• TV Shows
+• Anime
+• Games
+• Live TV
+• Upcoming Content
+• 18+ Content with appropriate access restrictions
+• Movie and episode streaming
+• Continue Watching
+• Watch History
+• Favorites / My List
+• Search
+• Downloads
+• Membership Plans
+• VIP Membership
+• Redeem Codes
+• User Profile
+• Notifications
+• Chat / Support
+• TMDB Metadata
+• Firebase Authentication
+• Firestore Database
+• Firebase Realtime Database where appropriate
+• Firebase Storage
+• Real-time synchronization with the MRFlix Admin Panel
+
+The Admin Panel is the central content management system.
+
+Content published by an authorized administrator must appear in the appropriate User Panel sections automatically, subject to publication status, membership eligibility, age restrictions, and access rules.
+
+The User Panel must not contain fake movie records presented as real production content.
+
+Use optional demo data only when explicitly enabled.
+
+==================================================
+2. DESIGN REQUIREMENTS
+
+Create a premium Netflix-style visual experience.
+
+DESIGN DIRECTION:
+Modern Light Theme + Premium Cinematic UI.
+
+The interface should feel polished, contemporary, fast, and professional.
+
+Use:
+• Clean white and soft-gray surfaces
+• Premium dark text
+• Cinematic movie artwork
+• Large featured banners
+• Rounded content cards
+• Smooth transitions
+• Subtle shadows
+• Attractive typography
+• Consistent spacing
+• High-quality icons
+• Responsive layouts
+• Skeleton loading
+• Empty states
+• Error states
+• Toast notifications
+• Modal dialogs
+• Accessible forms
+• Touch-friendly controls
+
+Suggested design tokens:
+
+--primary: #E50914;
+--primary-hover: #C90812;
+--background: #F7F8FA;
+--surface: #FFFFFF;
+--surface-secondary: #F0F2F5;
+--text-primary: #171717;
+--text-secondary: #6B7280;
+--border: #E5E7EB;
+--success: #16A34A;
+--warning: #F59E0B;
+--danger: #DC2626;
+
+Use the actual uploaded reference screenshots as the visual source of truth when available.
+
+Do not reproduce Netflix trademarks, logos, or proprietary assets.
+Create an original MRFlix identity inspired by the general cinematic OTT design pattern.
+
+DESIGN RULES:
+• Mobile-first.
+• Responsive on Android phones, tablets, and desktop browsers.
+• Full-height app-like experience.
+• No unwanted horizontal scrolling.
+• No overlapping navigation.
+• No broken image placeholders.
+• No oversized desktop-only layout on phones.
+• No browser-default buttons.
+• No fake functionality.
+• Use CSS animations sparingly for smooth performance.
+• Respect prefers-reduced-motion.
+• Use a consistent icon system such as Lucide Icons through a CDN.
+
+==================================================
+3. SINGLE-FILE ARCHITECTURE
+
+Create one index.html.
+
+Inside this file include:
+
+1. HTML structure
+2. Complete CSS
+3. JavaScript application logic
+4. Firebase SDK initialization
+5. Authentication management
+6. Firestore data access
+7. Realtime Database listeners where appropriate
+8. Storage upload support where required
+9. TMDB API integration
+10. Router / view management
+11. Movie and episode rendering
+12. Search
+13. Player
+14. Membership interface
+15. Redeem-code interface
+16. User profile
+17. Favorites
+18. Watch history
+19. Continue Watching
+20. Notifications
+21. Chat / Support
+22. Loading, empty, success, and error states
+
+Use Firebase's modular JavaScript SDK through official CDN modules.
+
+Do not use React, Vue, Angular, Node.js, PHP, or a frontend build process.
+
+The application must run from a suitable HTTPS hosting environment.
+
+Do not assume every feature can be secured solely with client-side JavaScript.
+
+Never place private API secrets, service-account keys, payment secrets, or administrator credentials in the HTML file.
+
+==================================================
+4. FIREBASE CONFIGURATION
+
+Use this Firebase configuration:
+
+const firebaseConfig = {
+apiKey: "AIzaSyB5d_A4BtAMDohzTr3ZgMEdDjtVwW-aTSs",
+authDomain: "mrflix-3fb8e.firebaseapp.com",
+projectId: "mrflix-3fb8e",
+storageBucket: "mrflix-3fb8e.firebasestorage.app",
+messagingSenderId: "836670217460",
+appId: "1:836670217460:web:617715d0480bb9359a52a1"
+};
+
+Initialize Firebase correctly.
+
+Use:
+• Firebase Authentication
+• Cloud Firestore
+• Firebase Realtime Database
+• Firebase Storage when required
+
+The exact Firebase Storage bucket and Realtime Database URL must be confirmed from the Firebase Console.
+
+Do not invent a database URL or assume that a service is enabled.
+
+If Realtime Database is used, make its databaseURL configurable.
+
+Example:
+
+const DATABASE_URL = "SET_YOUR_FIREBASE_REALTIME_DATABASE_URL";
+
+Initialize Firebase services with appropriate error handling.
+
+Do not create duplicate Firebase app instances.
+
+Show a clear connection state:
+• Connecting
+• Connected
+• Offline
+• Connection error
+
+Use Firebase Emulator support only as an optional development configuration.
+
+IMPORTANT:
+Firebase API keys identify a Firebase project; they are not substitutes for authorization.
+Security must be enforced by Firebase Security Rules and trusted backend controls.
+
+==================================================
+5. FIREBASE AUTHENTICATION
+
+Create a complete authentication interface.
+
+Required screens:
+
+• Welcome Screen
+• Login
+• Registration
+• Forgot Password
+• Email Verification Notice
+• Account Profile Setup
+• Logout Confirmation
+
+Support:
+• Email and password registration
+• Email and password login
+• Password reset
+• Authentication state persistence
+• Logout
+• Account display name
+• Profile image
+• Authentication error messages
+
+Optionally support Google sign-in if enabled and configured in Firebase Console.
+
+Do not create fake OTP functionality.
+
+Phone authentication must only be enabled when Firebase Phone Authentication and its verification requirements are configured.
+
+Do not ask users to expose passwords or verification codes in the browser console.
+
+After login:
+• Load the user's profile.
+• Load membership status.
+• Load favorites.
+• Load watch history.
+• Load Continue Watching.
+• Load user-specific notifications.
+• Display the profile image and display name.
+• Update the interface based on authentication state.
+
+When logged out:
+• Public browsing may be allowed if configured.
+• Protected actions must request authentication.
+• Account-specific information must never be exposed to other users.
+
+==================================================
+6. APP INITIALIZATION
+
+On startup:
+
+1. Initialize Firebase.
+2. Detect authentication state.
+3. Load public application settings.
+4. Load published categories.
+5. Load published featured content.
+6. Load published movies and series.
+7. Load the home section configuration.
+8. Load public announcements.
+9. Load user-specific information when authenticated.
+10. Render the home interface.
+11. Subscribe to relevant real-time updates.
+12. Remove obsolete listeners when changing views or logging out.
+
+Do not make hundreds of unnecessary database requests.
+
+Use efficient queries, pagination, caching, and reusable rendering functions.
+
+If Firebase is unavailable:
+• Display a friendly connection message.
+• Preserve safe local UI state where appropriate.
+• Do not silently substitute fake production data.
+• Provide a retry action.
+
+==================================================
+7. APP LAYOUT
+
+Create these major layout regions:
+
+A. Top App Bar
+B. Search Interface
+C. Main Content View
+D. Featured Movie Carousel
+E. Dynamic Home Sections
+F. Movie Detail Screen
+G. Streaming Player
+H. Floating Bottom Navigation
+I. Profile / Account Area
+J. Membership and Redeem Interface
+K. Notifications
+L. Chat / Support
+
+The interface must behave like a mobile OTT application.
+
+The bottom navigation must remain accessible without covering page content.
+
+Use safe-area insets on supported mobile devices.
+
+==================================================
+8. FLOATING BOTTOM NAVIGATION
+
+Create a premium floating bottom navigation bar with seven items:
+
+1. Search
+2. Download
+3. Coming Soon
+4. Home
+5. 18+
+6. Chat
+7. Profile
+
+HOME must be the default active item.
+
+Each item must:
+• Have a recognizable icon.
+• Have an accessible label.
+• Open its corresponding view.
+• Show the active state.
+• Support keyboard and touch interaction.
+• Avoid duplicate event handlers.
+• Preserve the appropriate application state.
+
+The navigation must work without reloading the entire page.
+
+When a user changes tabs:
+• Update the active state.
+• Render the corresponding screen.
+• Restore scroll position when appropriate.
+• Dispose of obsolete real-time listeners.
+• Do not duplicate database subscriptions.
+
+==================================================
+9. HOME SCREEN
+
+Build a premium OTT home page.
+
+Required sections:
+
+1. Featured Movie Carousel
+2. Continue Watching
+3. Trending Now
+4. Recently Added
+5. Popular Movies
+6. Recommended For You
+7. Movies
+8. Web Series
+9. TV Shows
+10. Anime
+11. Live TV
+12. Upcoming Movies
+13. Popular Categories
+14. VIP / Premium Content
+15. Recently Watched
+16. Admin-configured Custom Sections
+
+Do not force all sections to appear if the administrator has disabled them.
+
+The Admin Panel must control:
+• Section visibility
+• Section title
+• Section order
+• Section type
+• Selected content
+• Content limit
+• Display layout
+• Poster or backdrop presentation
+• Start and end dates when applicable
+
+Home section data must be loaded from Firebase.
+
+A section must disappear or show an appropriate empty state when it has no eligible content.
+
+Do not display unpublished content.
+
+Do not display content that a user is not permitted to access.
+
+==================================================
+10. FEATURED MOVIE CAROUSEL
+
+Build a large cinematic hero carousel.
+
+Each slide may contain:
+• Backdrop
+• Poster
+• Title
+• Original title
+• Description
+• Release year
+• Rating
+• Runtime
+• Language
+• Genres
+• Membership badge
+• Featured badge
+• Play button
+• More Info button
+• Add to My List button
+
+Features:
+• Automatic slide rotation.
+• Manual previous/next controls.
+• Touch swipe support.
+• Pause when the page is hidden.
+• Stop rotation when appropriate for accessibility.
+• Smooth transitions.
+• Responsive image sizing.
+• Fallback artwork.
+• Reduced-motion support.
+
+Load slides from published content configured by the Admin Panel.
+
+Only display content marked for the hero slider.
+
+Do not invent real movie information.
+
+==================================================
+11. MOVIE AND CONTENT CATALOGUE
+
+Support the following content types:
+
+• Movie
+• Web Series
+• TV Show
+• Anime
+• Game
+• Live TV
+• Upcoming Content
+• 18+ Content
+
+Each content item may contain:
+
+{
+id,
+type,
+title,
+originalTitle,
+slug,
+description,
+posterUrl,
+backdropUrl,
+trailerUrl,
+releaseDate,
+releaseYear,
+runtime,
+genres,
+categoryIds,
+language,
+audioLanguages,
+subtitles,
+ageRating,
+quality,
+resolution,
+tags,
+featured,
+trending,
+recommended,
+vipOnly,
+membershipType,
+streamingEnabled,
+downloadEnabled,
+comingSoon,
+status,
+createdAt,
+updatedAt
+}
+
+Use an appropriate Firestore document ID.
+
+Do not depend on a client-generated ID for authorization.
+
+Content must be loaded from Firebase, not hardcoded arrays.
+
+Support:
+• Latest content
+• Pagination
+• Sorting
+• Filtering
+• Category selection
+• Genre selection
+• Language selection
+• Release year
+• Free and Premium filters
+• Search by title
+
+Only show published content to normal users.
+
+Respect age restrictions and membership access.
+
+==================================================
+12. MOVIE DETAIL SCREEN
+
+When a user selects a movie, open a dedicated detail screen.
+
+Display:
+• Backdrop
+• Poster
+• Movie title
+• Original title
+• Release year
+• Runtime
+• Age rating
+• TMDB rating when available
+• Genres
+• Language
+• Description
+• Trailer
+• Available quality
+• Audio languages
+• Subtitles
+• Membership badge
+• Cast and Crew
+• Related movies
+• Similar content
+• Recommended content
+
+Actions:
+• Play
+• Watch Trailer
+• Add to My List
+• Remove from My List
+• Share
+• Download if authorized
+• Select audio language when supported
+• Select subtitle when supported
+• Report playback problem
+
+If the item is upcoming:
+• Display Coming Soon.
+• Display the release date when available.
+• Allow reminders only if the notification implementation is configured.
+
+If the item requires VIP access:
+• Display the appropriate membership information.
+• Offer a Membership page.
+• Do not expose protected stream URLs to unauthorized users.
+
+==================================================
+13. VIDEO PLAYER
+
+Build a real streaming player.
+
+Support browser-compatible:
+• MP4 URLs
+• HLS streams when supported
+• Multiple authorized streaming sources
+
+Use the native HTML5 video element for direct compatible media.
+
+An HLS JavaScript library may be loaded through a CDN when necessary.
+
+Player controls:
+• Play / Pause
+• Seek
+• Volume
+• Mute
+• Fullscreen
+• Playback speed
+• Progress display
+• Current time
+• Duration
+• Subtitle selection where available
+• Audio selection where supported
+• Quality selection when multiple sources are available
+• Next Episode
+• Previous Episode
+• Skip Intro when configured
+• Resume Watching
+• Playback Error
+• Retry
+• Report Issue
+
+Persist playback progress periodically.
+
+Store user progress in a user-specific Firestore location.
+
+Resume playback when the user returns.
+
+For episodic content:
+• Show the season and episode list.
+• Mark watched episodes.
+• Offer the next episode.
+• Avoid automatically playing another episode when autoplay is disabled.
+
+IMPORTANT:
+A movie page URL, YouTube watch URL, or ordinary webpage is not automatically a playable media stream.
+
+Validate supported media sources and show an understandable error if playback is impossible.
+
+Do not bypass DRM, authentication, geographic restrictions, or content-provider protections.
+
+Only stream content that the application is authorized to distribute.
+
+If signed stream URLs or protected playback require a trusted server, document that dependency.
+
+Do not claim that browser-side checks alone protect media from copying.
+
+==================================================
+14. CONTINUE WATCHING
+
+Create a Continue Watching section.
+
+For authenticated users, save:
+
+{
+contentId,
+contentType,
+title,
+posterUrl,
+episodeId,
+seasonNumber,
+episodeNumber,
+progressSeconds,
+durationSeconds,
+progressPercent,
+updatedAt,
+completed
+}
+
+Features:
+• Resume from the saved position.
+• Remove from Continue Watching.
+• Mark as completed.
+• Automatically update progress.
+• Handle deleted or unpublished content.
+• Hide completed items when configured.
+• Avoid writing progress every second.
+
+Use throttled or periodic updates.
+
+Prevent one user from reading another user's watch history.
+
+==================================================
+15. SEARCH SYSTEM
+
+Build a functional search screen.
+
+Search:
+• Movie titles
+• Original titles
+• Web Series
+• TV Shows
+• Anime
+• Games
+• Genres
+• Categories
+• Cast and Crew where indexed
+
+Features:
+• Search input
+• Clear button
+• Debounced search
+• Recent searches
+• Popular searches when configured
+• Search result grid
+• Search filters
+• Loading state
+• Empty state
+• Error state
+• Pagination or Load More
+
+Use indexed Firestore queries, controlled search fields, or an authorized search provider.
+
+Do not assume Firestore supports arbitrary full-text search natively.
+
+For advanced full-text search, document the required search provider or indexing process.
+
+Never expose TMDB API secrets or private credentials.
+
+==================================================
+16. DOWNLOAD SYSTEM
+
+Create a Download screen.
+
+Features:
+• Download-eligible content list.
+• Download button.
+• Download status.
+• Retry failed downloads.
+• Remove download record.
+• Show unavailable download state.
+
+Only permit downloads when:
+• The Admin Panel enables downloading.
+• The user is authorized.
+• The media source allows downloading.
+• The platform supports the operation.
+
+Do not display a fake download-complete state.
+
+Browser downloads must respect browser security, CORS, storage limits, and provider restrictions.
+
+If offline downloads require a native Android application or a protected media service, explain that limitation clearly.
+
+Do not copy restricted streams or bypass DRM.
+
+==================================================
+17. COMING SOON
+
+Create a Coming Soon screen.
+
+Display:
+• Poster
+• Backdrop
+• Title
+• Description
+• Release date
+• Genre
+• Content type
+• Trailer when available
+• Reminder button when supported
+
+Load upcoming items from Firebase.
+
+Support Admin-controlled sorting and featured upcoming content.
+
+Hide unpublished items.
+
+Handle missing release dates gracefully.
+
+==================================================
+18. 18+ CONTENT
+
+Create an age-restricted content section.
+
+Requirements:
+• Use the age rating configured by the Admin Panel.
+• Provide an appropriate age-confirmation flow.
+• Do not display restricted content to users who do not meet the configured age requirement.
+• Keep 18+ content out of general recommendations for ineligible users.
+• Avoid showing explicit artwork to ineligible users.
+• Respect the platform's applicable legal requirements.
+
+IMPORTANT:
+A client-side age confirmation is not reliable identity or age verification.
+
+If legally required age verification is necessary, integrate an appropriate compliant verification provider.
+
+Do not collect unnecessary sensitive personal data.
+
+Do not expose the 18+ catalogue through unrestricted public database queries.
+
+==================================================
+19. WEB SERIES, TV SHOWS, AND ANIME
+
+Support series-style content.
+
+Data structure:
+
+Series:
+• Title
+• Description
+• Poster
+• Backdrop
+• Release Year
+• Genres
+• Language
+• Age Rating
+• Membership Type
+• Status
+• Featured
+• Trending
+
+Season:
+• Series ID
+• Season Number
+• Season Title
+• Season Description
+• Poster
+• Release Date
+
+Episode:
+• Series ID
+• Season ID
+• Episode Number
+• Episode Title
+• Description
+• Thumbnail
+• Runtime
+• Stream Sources
+• Subtitles
+• Audio Languages
+• Release Date
+• Intro Skip Time
+• Outro Skip Time
+• Status
+
+Features:
+• Season selector
+• Episode list
+• Episode details
+• Resume playback
+• Next episode
+• Previous episode
+• Watched indicator
+• Continue Watching
+• Episode sorting
+
+Load all content from Firebase.
+
+Support separate category pages for Web Series, TV Shows, and Anime.
+
+Do not assume every series has seasons or every season has episodes.
+
+==================================================
+20. LIVE TV
+
+Create a Live TV interface.
+
+Each channel may contain:
+• Channel name
+• Logo
+• Thumbnail
+• Description
+• Category
+• Language
+• Stream URL
+• Quality
+• Country
+• Status
+
+Features:
+• Channel list
+• Channel details
+• Player
+• Retry playback
+• Favorite channels
+• Search
+• Category filtering
+
+Only play authorized, browser-compatible live streams.
+
+If the source is offline or unsupported, show a clear error.
+
+Do not claim that a channel works without testing its stream.
+
+==================================================
+21. MEMBERSHIP SYSTEM
+
+Create a Membership screen.
+
+Display membership plans managed by the Admin Panel.
+
+Each plan may contain:
+• Plan ID
+• Name
+• Description
+• Price
+• Currency
+• Duration
+• Benefits
+• VIP access
+• Maximum devices
+• Download permission
+• Quality allowance
+• Status
+
+Display:
+• Current plan
+• Membership expiration
+• Available plans
+• Plan comparison
+• Purchase instructions
+• Redeem Code option
+• Payment status
+• Membership history
+
+The Admin Panel controls which plans are visible.
+
+IMPORTANT:
+Do not grant membership merely because a browser form says payment succeeded.
+
+Membership status must be verified by a trusted payment verification process or a trusted administrator workflow.
+
+If automatic payment verification is unavailable, use a clearly labeled manual payment request workflow.
+
+Do not store payment card details in Firestore.
+
+Do not expose payment provider secrets in the client.
+
+==================================================
+22. REDEEM CODE SYSTEM
+
+Create a Redeem Code interface.
+
+User flow:
+1. Enter code.
+2. Validate input format.
+3. Submit the request.
+4. Show the result.
+5. Display updated membership when confirmed.
+
+Possible states:
+• Invalid Code
+• Expired Code
+• Already Used
+• Not Eligible
+• Processing
+• Successfully Redeemed
+
+A valid code may grant:
+• Membership duration
+• VIP access
+• Promotional benefits
+• Admin-defined entitlements
+
+Security requirements:
+• Codes must be generated and managed by the Admin Panel.
+• Codes must have expiration and usage restrictions.
+• Per-user restrictions must be enforced.
+• Usage limits must be enforced atomically.
+• A user must not redeem the same single-use code multiple times.
+• A user must not modify their own membership by editing Firestore documents.
+
+IMPORTANT:
+A secure, race-safe redeem-code operation generally requires trusted backend logic or another trusted atomic workflow.
+
+Do not implement security-critical redemption by trusting a client-side JavaScript function.
+
+If Firebase Cloud Functions are not being used, clearly document the alternative trusted implementation required.
+
+Never claim that client-side-only redemption is secure.
+
+==================================================
+23. USER PROFILE
+
+Create a profile screen.
+
+Display:
+• Profile photo
+• Display name
+• Email
+• Membership status
+• Membership expiration
+• Favorites
+• Watch History
+• Continue Watching
+• Download records
+• Notifications
+• Account settings
+• Privacy settings
+• Change password flow where supported
+• Logout
+• Delete Account flow where supported
+• App version
+
+Allow users to update:
+• Display name
+• Profile photo
+• Basic profile preferences
+
+Validate user input.
+
+Use Firebase Storage for profile images if enabled.
+
+Limit file size and validate image types.
+
+Do not allow a normal user to modify administrative roles, membership entitlements, or another user's data.
+
+Account deletion must use a proper account-deletion workflow and handle related data according to the application's retention policy.
+
+==================================================
+24. FAVORITES / MY LIST
+
+Implement a working My List feature.
+
+Users can:
+• Add a movie to My List.
+• Remove a movie.
+• Add series to My List.
+• View saved items.
+• Open item details.
+• See unavailable content status.
+
+Persist data per authenticated user.
+
+Prevent duplicate entries.
+
+Synchronize changes between sessions.
+
+Do not allow one user to access another user's private list.
+
+==================================================
+25. NOTIFICATIONS
+
+Create a Notifications screen.
+
+Notification types:
+• New Movie
+• New Episode
+• Upcoming Release
+• Membership Update
+• Redeem Result
+• Payment Update
+• Admin Announcement
+• Account Notice
+
+Each notification may contain:
+• Title
+• Message
+• Type
+• Created At
+• Read Status
+• Optional Content ID
+• Optional Destination
+
+Features:
+• Mark as read
+• Mark all as read
+• Open linked content
+• Delete or dismiss when permitted
+
+Load user-specific notifications from Firebase.
+
+Do not expose private notifications publicly.
+
+Push notifications require additional platform and messaging configuration; do not fake push delivery.
+
+==================================================
+26. CHAT / SUPPORT
+
+Create a Chat / Support interface.
+
+Include:
+• Frequently Asked Questions
+• Contact Admin
+• Support message form
+• Message history for authenticated users
+• Ticket status
+• Created time
+• Reply status
+
+Optional:
+• Real-time chat using a suitable Firebase data model.
+
+The chat must not reveal another user's messages.
+
+Implement input validation and basic abuse prevention.
+
+Do not promise instant human support unless an actual support operator workflow exists.
+
+If no operator is online, show an appropriate offline message.
+
+==================================================
+27. TMDB INTEGRATION
+
+Integrate TMDB for metadata and artwork discovery.
+
+Support:
+• Search Movies
+• Search TV Shows
+• Movie Details
+• TV Details
+• Posters
+• Backdrops
+• Genres
+• Release Dates
+• Overview
+• Cast
+• Crew
+• Ratings where available
+• Similar Content
+• Recommendations
+
+TMDB is a metadata source, not a source of movie streaming files or distribution rights.
+
+Never treat a TMDB result as a playable movie.
+
+Never automatically publish every TMDB search result.
+
+The Admin Panel decides which items are imported and published.
+
+For a public browser application, use a suitably configured TMDB application credential only as permitted by TMDB's current authentication requirements.
+
+Do not expose private TMDB credentials.
+
+If the required credential cannot safely be used directly in a browser, document the necessary secure proxy or backend alternative.
+
+Do not assume a secret TMDB API key is safe simply because it is stored in JavaScript.
+
+Provide:
+• Search input
+• Loading state
+• Result cards
+• Detail preview
+• Error handling
+• Attribution according to TMDB requirements
+
+==================================================
+28. ADMIN PANEL INTEGRATION
+
+The User Panel and Admin Panel must share a consistent Firebase data model.
+
+When an authorized administrator publishes a movie:
+• The movie becomes available in the appropriate User Panel sections.
+• Its category is respected.
+• Its publication status is respected.
+• Its featured/trending configuration is respected.
+• Its membership restrictions are respected.
+
+When an administrator updates metadata:
+• The User Panel reflects the update through real-time listeners or a suitable refresh strategy.
+
+When an administrator unpublishes content:
+• It must no longer appear in public catalogue queries.
+• Existing references must handle the unavailable state.
+• Access to restricted streams must be denied by the trusted access-control system.
+
+When an administrator deletes content:
+• The User Panel must not crash.
+• Broken references must be handled gracefully.
+• Related user history should be retained or cleaned up according to policy.
+
+Do not create a separate hardcoded content database inside the User Panel.
+
+Use shared collection names and field definitions.
+
+If the Admin Panel already uses a different schema, document and implement an explicit mapping instead of silently creating an incompatible schema.
+
+==================================================
+29. FIREBASE DATA MODEL
+
+Use a documented, consistent Firestore data model.
+
+Suggested collections:
+
+appSettings/{settingId}
+
+categories/{categoryId}
+
+genres/{genreId}
+
+movies/{movieId}
+
+series/{seriesId}
+
+seasons/{seasonId}
+
+episodes/{episodeId}
+
+games/{gameId}
+
+liveChannels/{channelId}
+
+heroSlides/{slideId}
+
+homeSections/{sectionId}
+
+actors/{actorId}
+
+castCrew/{recordId}
+
+membershipPlans/{planId}
+
+users/{userId}
+
+users/{userId}/favorites/{favoriteId}
+
+users/{userId}/watchHistory/{historyId}
+
+users/{userId}/continueWatching/{progressId}
+
+users/{userId}/notifications/{notificationId}
+
+users/{userId}/downloads/{downloadId}
+
+users/{userId}/supportTickets/{ticketId}
+
+users/{userId}/membershipHistory/{recordId}
+
+redeemCodes/{codeId}
+
+paymentRequests/{requestId}
+
+ads/{adId}
+
+comments/{commentId}
+
+movieRequests/{requestId}
+
+activityLogs/{logId}
+
+IMPORTANT:
+These are proposed schema names, not permission grants.
+
+Choose the appropriate document relationships.
+
+Avoid duplicating large objects unnecessarily.
+
+Store image and video binaries in an appropriate media-storage service, not inside Firestore documents.
+
+Use Firestore timestamps where appropriate.
+
+Use server-generated timestamps for trusted operations.
+
+Validate required fields and document size.
+
+Use pagination for large collections.
+
+If the existing Admin Panel schema differs, update both panels to use the same schema or document a compatibility adapter.
+
+==================================================
+30. REAL-TIME SYNCHRONIZATION
+
+Use Firestore onSnapshot for suitable real-time catalogue and configuration updates.
+
+Use Realtime Database only where it is appropriate and configured.
+
+Do not duplicate the same content in Firestore and Realtime Database without a documented reason.
+
+Real-time updates should cover:
+• Published content
+• Hero slides
+• Home sections
+• Categories
+• Membership plan display
+• Public announcements
+• User notifications
+• User profile updates where appropriate
+
+Requirements:
+• Clean up listeners.
+• Avoid duplicate subscriptions.
+• Handle permission errors.
+• Handle offline state.
+• Avoid unbounded listeners.
+• Use query constraints.
+• Do not assume Security Rules filter query results.
+
+IMPORTANT FIRESTORE RULE:
+Firestore Security Rules are not filters.
+
+If public users may read only published movies, the client query must match the authorization model.
+
+For example, public catalogue queries should constrain the relevant publication fields.
+
+Handle documents with missing or legacy fields carefully.
+
+Do not solve query permission errors by opening every collection to public reads.
+
+==================================================
+31. FIREBASE STORAGE
+
+Use Firebase Storage for:
+• User profile images
+• User-uploaded support attachments if enabled and necessary
+
+Media assets managed by the Admin Panel may include:
+• Posters
+• Backdrops
+• Thumbnails
+• Channel logos
+
+The User Panel should normally read authorized media assets and should not upload admin-managed movie content.
+
+Requirements:
+• Validate MIME type.
+• Enforce size limits.
+• Handle upload failures.
+• Handle missing files.
+• Display upload progress where user uploads are enabled.
+• Avoid exposing private files through unrestricted rules.
+
+Use actual configured Storage paths.
+
+Do not store binary image data as Base64 inside Firestore.
+
+Do not store full movie files inside Firestore.
+
+For large streaming media, use an appropriate video hosting or streaming service.
+
+==================================================
+32. ACCESS CONTROL
+
+Implement proper Firebase Security Rules.
+
+Public users may only read appropriate public content.
+
+Authenticated users may access only their own private data.
+
+Normal users must not be able to:
+• Change their role to admin.
+• Change another user's membership.
+• Grant themselves VIP access.
+• Redeem unlimited codes.
+• Modify payment verification results.
+• Read private messages belonging to other users.
+• Read private watch histories belonging to other users.
+• Access unpublished or restricted content.
+• Upload administrative content.
+• Change global app settings.
+
+Administrator permissions must be verified by trusted authorization data and appropriate Security Rules.
+
+Never trust a client-side variable such as:
+
+isAdmin = true
+
+Never store administrator passwords in HTML.
+
+Never ship service-account credentials in the browser.
+
+IMPORTANT:
+If the existing Admin Panel requires an administrator role, create and secure the corresponding authorization record using an authorized setup process.
+
+Do not allow normal users to create their own admin role records.
+
+==================================================
+33. PERFORMANCE OPTIMIZATION
+
+Optimize the app for mobile devices and slower networks.
+
+Requirements:
+• Lazy-load images.
+• Use appropriately sized artwork.
+• Prefer modern image formats where available.
+• Use responsive image dimensions.
+• Paginate catalogues.
+• Debounce search.
+• Cache safe public metadata where appropriate.
+• Avoid repeated database reads.
+• Remove obsolete event listeners.
+• Remove Firebase subscriptions when no longer needed.
+• Avoid rendering huge lists at once.
+• Use efficient DOM updates.
+• Prevent layout shifts.
+• Use loading skeletons.
+• Handle offline and reconnect states.
+• Avoid excessive animations.
+• Avoid unnecessary JavaScript libraries.
+
+Do not cache private account information in shared storage.
+
+Do not cache protected media URLs beyond their authorized lifetime.
+
+==================================================
+34. SECURITY AND PRIVACY
+
+Implement:
+• Input validation
+• Output escaping
+• Safe DOM rendering
+• Authentication checks
+• Access control
+• Firestore Security Rules
+• Storage Security Rules
+• Rate-limiting strategy for abuse-prone operations
+• Appropriate error messages
+• Secure logout behavior
+• Privacy-aware data storage
+
+Do not insert untrusted HTML using innerHTML without proper sanitization.
+
+Avoid exposing sensitive data in console logs.
+
+Do not store passwords in localStorage.
+
+Do not trust membership information supplied by the client.
+
+Do not trust a payment success message from a query parameter.
+
+Do not place private credentials in source code.
+
+A single HTML file is a frontend packaging requirement, not a security boundary.
+
+==================================================
+35. EMPTY, LOADING, AND ERROR STATES
+
+Every data-driven screen must support:
+
+• Loading
+• Success
+• Empty
+• Network Error
+• Permission Denied
+• Invalid Data
+• Unavailable Content
+• Retry
+
+Examples:
+
+"No movies available yet."
+
+"Please sign in to access your watch history."
+
+"This content is not available."
+
+"Unable to connect. Please try again."
+
+"Your membership status could not be verified."
+
+Do not leave the screen blank when a request fails.
+
+Do not display a success message when the underlying operation fails.
+
+==================================================
+36. ACCESSIBILITY
+
+Implement:
+• Semantic HTML
+• Accessible labels
+• Keyboard navigation
+• Visible focus indicators
+• Sufficient contrast
+• Screen-reader-friendly buttons
+• Accessible dialog behavior
+• Reduced-motion support
+• Meaningful image alt text
+• Touch-friendly button sizes
+
+Do not rely on color alone to communicate status.
+
+==================================================
+37. FIREBASE SETUP DOCUMENTATION
+
+Provide a clear Firebase setup guide with the final code.
+
+STEP 1:
+Open the Firebase Console.
+
+https://console.firebase.google.com/
+
+Select the project:
+
+mrflix-3fb8e
+
+STEP 2:
+Confirm the Web App configuration.
+
+Use the supplied firebaseConfig.
+
+STEP 3:
+Enable Authentication.
+
+Recommended initial provider:
+Email/Password.
+
+Enable Google or Phone Authentication only when configured and needed.
+
+STEP 4:
+Create the Firestore Database.
+
+Choose an appropriate production location.
+
+Do not enable unrestricted public database access.
+
+STEP 5:
+Configure Firebase Realtime Database if the project requires it.
+
+Copy the actual database URL from the Firebase Console.
+
+Do not invent the database URL.
+
+STEP 6:
+Configure Firebase Storage if needed.
+
+Verify the actual bucket name.
+
+Confirm billing and plan requirements in the Firebase Console.
+
+STEP 7:
+Deploy Firestore Security Rules.
+
+Provide a complete example rules file compatible with the proposed data model.
+
+Rules must distinguish:
+• Public published catalogue
+• Authenticated private user data
+• Admin-only management
+• Protected membership information
+• Restricted content
+
+STEP 8:
+Deploy Storage Security Rules.
+
+Protect private user files and admin-managed content.
+
+STEP 9:
+Create the initial administrator authorization record using an authorized setup procedure.
+
+Never expose administrator credentials.
+
+STEP 10:
+Create the required initial configuration documents.
+
+Document each required collection and example document shape.
+
+STEP 11:
+Create an authorized published movie for testing.
+
+STEP 12:
+Open the User Panel over HTTPS.
+
+STEP 13:
+Test registration and login.
+
+STEP 14:
+Test public catalogue queries.
+
+STEP 15:
+Test real-time publication from the Admin Panel.
+
+STEP 16:
+Test unauthorized access and verify that Security Rules deny it.
+
+Provide troubleshooting steps for:
+• Permission denied
+• Missing index
+• Storage upload failure
+• Invalid Firebase configuration
+• Authentication provider disabled
+• Missing Realtime Database URL
+• Unsupported stream
+• CORS failure
+• TMDB authentication error
+
+Never recommend solving a permission error by making all database collections public.
+
+==================================================
+38. FIREBASE CLOUD FUNCTIONS REQUIREMENT
+
+The initial frontend must not depend on Firebase Cloud Functions merely to render the interface or read authorized public content.
+
+However, certain security-sensitive features may require trusted backend execution.
+
+Examples:
+• Payment verification
+• Secure redeem-code redemption
+• Membership entitlement changes
+• Protected streaming authorization
+• Trusted administrative operations
+• Atomic usage limits
+
+If Firebase Cloud Functions are not being used:
+• Identify which operations cannot be implemented securely using browser-only JavaScript.
+• Provide a safe alternative trusted architecture.
+• Do not silently pretend that a client-only workaround is secure.
+• Do not grant privileged access to normal users.
+• Do not expose server credentials.
+
+A secure alternative may be an appropriately configured external backend or a trusted administrative workflow.
+
+The application must remain usable for all features that can safely operate directly through Firebase client SDKs and Security Rules.
+
+==================================================
+39. REQUIRED FUNCTIONALITY
+
+Do not create buttons that do nothing.
+
+Every visible action must:
+• Perform its intended operation,
+• Show a clear disabled state if unavailable,
+• Or explain why it is unavailable.
+
+Implement working:
+• Login
+• Registration
+• Logout
+• Password reset
+• Home navigation
+• Search
+• Movie details
+• Movie playback for valid sources
+• Add/remove favorites
+• Watch history
+• Continue Watching
+• Coming Soon
+• Categories
+• Series details
+• Season and episode navigation
+• Membership information
+• Redeem interface
+• Profile editing
+• Notifications
+• Support tickets
+• Real-time catalogue updates
+• Loading indicators
+• Error messages
+• Retry controls
+
+For functions that depend on external configuration, show a clear configuration-required message.
+
+Do not fabricate successful database writes.
+
+Do not simulate a real payment, real streaming source, real push notification, or secure m

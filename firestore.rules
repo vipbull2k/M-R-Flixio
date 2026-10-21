@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check authentication
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to verify user identity
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function to verify Admin role (configured in users or admin list)
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.admin == true || 
+         request.auth.token.email == "toxicbossmr@gmail.com");
+    }
+
+    // Public Published Catalogues (Movies, Series, Live TV, Categories, Hero Slides)
+    match /movies/{movieId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /series/{seriesId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /liveChannels/{channelId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /heroSlides/{slideId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /homeSections/{sectionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /membershipPlans/{planId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // User Private Profile & Subcollections
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+      
+      match /favorites/{favId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      match /watchHistory/{historyId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      match /continueWatching/{contentId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      match /downloads/{downloadId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      match /supportTickets/{ticketId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      match /notifications/{notifId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // Redeem Codes (Protected: read/write strictly admin or backend verification)
+    match /redeemCodes/{codeId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Payment Requests (Users can create, only admin can approve/verify)
+    match /paymentRequests/{requestId} {
+      allow create: if isAuthenticated();
+      allow read, update, delete: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+    }
+  }
+}

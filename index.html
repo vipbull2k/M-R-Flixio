@@ -1,0 +1,4144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>MRFlix — Premium Netflix-Style OTT Streaming Platform</title>
+  
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- HLS.js for Live & HTTP Live Streaming -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <style>
+    /* =====================================================================
+       DESIGN TOKENS & SYSTEM VARIABLES (Modern Light Theme + Cinematic UI)
+       ===================================================================== */
+    :root {
+      --primary: #E50914;
+      --primary-hover: #C90812;
+      --primary-light: rgba(229, 9, 20, 0.08);
+      --primary-glow: rgba(229, 9, 20, 0.25);
+      --background: #F7F8FA;
+      --surface: #FFFFFF;
+      --surface-secondary: #F0F2F5;
+      --surface-tertiary: #E4E7EB;
+      --text-primary: #171717;
+      --text-secondary: #6B7280;
+      --text-muted: #9CA3AF;
+      --border: #E5E7EB;
+      --border-focus: #171717;
+      --success: #16A34A;
+      --warning: #F59E0B;
+      --danger: #DC2626;
+      --gold: #D97706;
+      --gold-bg: #FEF3C7;
+      --card-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -2px rgba(0, 0, 0, 0.03);
+      --float-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+      --modal-backdrop: rgba(15, 23, 42, 0.65);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --safe-bottom: env(safe-area-inset-bottom, 16px);
+      --safe-top: env(safe-area-inset-top, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--background);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: calc(88px + var(--safe-bottom));
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D1D5DB;
+      border-radius: 999px;
+    }
+
+    /* =====================================================================
+       TOP APP BAR
+       ===================================================================== */
+    .top-app-bar {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: calc(10px + var(--safe-top)) 16px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, var(--primary), #990000);
+      color: #fff;
+      font-weight: 800;
+      font-size: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px var(--primary-glow);
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+    }
+    .brand-name span {
+      color: var(--primary);
+    }
+
+    .app-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 20px;
+      background: var(--surface-secondary);
+      color: var(--text-secondary);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      display: inline-block;
+    }
+    .status-dot.offline {
+      background: var(--warning);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      position: relative;
+      background: var(--surface-secondary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .icon-btn:hover {
+      background: #E5E7EB;
+      transform: translateY(-1px);
+    }
+    .icon-btn:active {
+      transform: scale(0.96);
+    }
+
+    .icon-btn .badge-counter {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      min-width: 17px;
+      height: 17px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      border: 2px solid #fff;
+    }
+
+    .vip-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--gold-bg);
+      color: var(--gold);
+      border: 1px solid #FDE68A;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .vip-pill-btn:active {
+      transform: scale(0.96);
+    }
+
+    .user-avatar-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: #E5E7EB;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .user-avatar-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* =====================================================================
+       FLOATING BOTTOM NAVIGATION (7 Items: Search, Download, Coming Soon, Home, 18+, Chat, Profile)
+       ===================================================================== */
+    .bottom-nav-wrap {
+      position: fixed;
+      bottom: calc(10px + var(--safe-bottom));
+      left: 0;
+      right: 0;
+      z-index: 85;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+      padding: 0 12px;
+    }
+
+    .bottom-nav {
+      pointer-events: auto;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(229, 231, 235, 0.8);
+      border-radius: 26px;
+      box-shadow: var(--float-shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2px;
+      padding: 6px 8px;
+      width: 100%;
+      max-width: 540px;
+    }
+
+    .nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      padding: 6px 4px;
+      border-radius: 16px;
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 600;
+      flex: 1;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.22s ease;
+      min-width: 44px;
+    }
+    .nav-tab svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.1;
+      margin-bottom: 2px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .nav-tab:hover {
+      color: var(--primary);
+    }
+    .nav-tab.active {
+      color: var(--primary);
+    }
+    .nav-tab.active svg {
+      transform: translateY(-2px);
+    }
+
+    /* Elevated center HOME tab */
+    .nav-tab.home-tab {
+      position: relative;
+    }
+    .nav-tab.home-tab .home-bubble {
+      width: 42px;
+      height: 42px;
+      background: var(--surface-secondary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: -14px;
+      margin-bottom: 2px;
+      border: 3px solid #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.25s ease;
+    }
+    .nav-tab.home-tab.active .home-bubble {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 6px 16px var(--primary-glow);
+    }
+
+    .mature-badge-mini {
+      background: #111;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 4px;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    /* =====================================================================
+       MAIN LAYOUT CONTAINER & VIEWS
+       ===================================================================== */
+    .main-viewport {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .view-screen {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+    .view-screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Category Filter Bar */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 0 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .filter-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip-btn {
+      white-space: nowrap;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 7px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .chip-btn:hover {
+      background: var(--surface-secondary);
+      color: var(--text-primary);
+    }
+    .chip-btn.active {
+      background: var(--text-primary);
+      color: #FFFFFF;
+      border-color: var(--text-primary);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+
+    /* =====================================================================
+       FEATURED HERO CAROUSEL
+       ===================================================================== */
+    .hero-carousel-container {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      max-height: 55vh;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-top: 10px;
+      margin-bottom: 28px;
+      box-shadow: var(--card-shadow);
+      background: #111;
+    }
+
+    @media (min-width: 768px) {
+      .hero-carousel-container {
+        height: 480px;
+      }
+    }
+
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      transform: scale(1.02);
+      pointer-events: none;
+    }
+    .hero-slide.active {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .hero-backdrop {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 25%;
+    }
+
+    .hero-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(15, 23, 42, 0.1) 0%,
+        rgba(15, 23, 42, 0.45) 50%,
+        rgba(10, 15, 29, 0.92) 100%
+      );
+    }
+
+    .hero-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 24px;
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 720px;
+    }
+
+    .hero-badges-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tag-badge.featured {
+      background: var(--primary);
+      color: #fff;
+    }
+    .tag-badge.vip {
+      background: var(--gold);
+      color: #fff;
+    }
+    .tag-badge.quality {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      color: #fff;
+    }
+    .tag-badge.age {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+
+    .hero-title {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    @media (min-width: 768px) {
+      .hero-title {
+        font-size: 38px;
+      }
+    }
+
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: #E2E8F0;
+      font-weight: 500;
+    }
+    .hero-meta .star-rating {
+      color: #FBBF24;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-weight: 700;
+    }
+
+    .hero-overview {
+      font-size: 13px;
+      color: #CBD5E1;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.4;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--primary-glow);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .btn-secondary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-icon-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-icon-circle:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .hero-dots {
+      position: absolute;
+      bottom: 12px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 10;
+    }
+    .hero-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .hero-dot.active {
+      width: 22px;
+      border-radius: 999px;
+      background: var(--primary);
+    }
+
+    /* =====================================================================
+       CONTENT SECTIONS & CARD RAILS
+       ===================================================================== */
+    .content-section {
+      margin-bottom: 30px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-accent {
+      width: 4px;
+      height: 18px;
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+    }
+
+    .see-all-link {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .see-all-link:hover {
+      text-decoration: underline;
+    }
+
+    .horizontal-rail {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-snap-type: x mandatory;
+    }
+    .horizontal-rail::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Standard Poster Card */
+    .media-card {
+      position: relative;
+      flex: 0 0 140px;
+      scroll-snap-align: start;
+      cursor: pointer;
+      transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @media (min-width: 640px) {
+      .media-card {
+        flex: 0 0 170px;
+      }
+    }
+    .media-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .poster-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--surface-secondary);
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border);
+    }
+
+    .poster-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .media-card:hover .poster-img {
+      transform: scale(1.04);
+    }
+
+    .vip-corner-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: linear-gradient(135deg, #F59E0B, #D97706);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      z-index: 2;
+    }
+
+    .rating-badge {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .media-info {
+      padding: 8px 2px 2px;
+    }
+
+    .media-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .media-subtitle {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    /* Continue Watching Card with Progress Bar */
+    .continue-card {
+      position: relative;
+      flex: 0 0 220px;
+      scroll-snap-align: start;
+      cursor: pointer;
+    }
+    @media (min-width: 640px) {
+      .continue-card {
+        flex: 0 0 260px;
+      }
+    }
+
+    .continue-backdrop-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #111;
+      border: 1px solid var(--border);
+      box-shadow: var(--card-shadow);
+    }
+    .continue-backdrop-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .play-overlay-btn {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.35);
+      transition: background 0.2s ease;
+    }
+    .continue-card:hover .play-overlay-btn {
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .play-circle {
+      width: 44px;
+      height: 44px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px var(--primary-glow);
+      transition: transform 0.2s ease;
+    }
+    .continue-card:hover .play-circle {
+      transform: scale(1.1);
+    }
+
+    .remove-history-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 4;
+    }
+
+    .progress-bar-bg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 45%;
+    }
+
+    /* Live Channel Card */
+    .live-card {
+      position: relative;
+      flex: 0 0 180px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px;
+      cursor: pointer;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--danger);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+    .live-pulsing-dot {
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+
+    /* =====================================================================
+       SEARCH & EXPLORER VIEW
+       ===================================================================== */
+    .search-header-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--card-shadow);
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    .search-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface-secondary);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      transition: border 0.2s ease;
+    }
+    .search-input-wrap:focus-within {
+      border-color: var(--primary);
+      background: #FFFFFF;
+    }
+    .search-input-wrap input {
+      border: none;
+      background: none;
+      outline: none;
+      width: 100%;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .search-tabs-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+    .search-subtab {
+      background: none;
+      border: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      padding: 6px 4px;
+      cursor: pointer;
+      position: relative;
+    }
+    .search-subtab.active {
+      color: var(--primary);
+    }
+    .search-subtab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -7px;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .grid-results {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+    @media (min-width: 640px) {
+      .grid-results {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (min-width: 900px) {
+      .grid-results {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    /* =====================================================================
+       DETAIL SCREEN (MODAL / OVERLAY)
+       ===================================================================== */
+    .detail-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      background: var(--modal-backdrop);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      overflow-y: auto;
+      padding: 16px;
+    }
+    .detail-overlay.active {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .detail-card {
+      position: relative;
+      background: var(--surface);
+      border-radius: var(--radius-xl);
+      max-width: 820px;
+      width: 100%;
+      overflow: hidden;
+      margin: 20px auto 80px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+      animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .detail-close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .detail-close-btn:hover {
+      background: rgba(0, 0, 0, 0.85);
+    }
+
+    .detail-backdrop-box {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      background: #111;
+    }
+    @media (min-width: 768px) {
+      .detail-backdrop-box {
+        height: 380px;
+      }
+    }
+    .detail-backdrop-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .detail-backdrop-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(255,255,255,0.85) 85%, #FFFFFF 100%);
+    }
+
+    .detail-body {
+      padding: 24px;
+      margin-top: -60px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .detail-header-flex {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .detail-poster-thumbnail {
+      width: 120px;
+      aspect-ratio: 2 / 3;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      box-shadow: var(--float-shadow);
+      border: 3px solid #fff;
+      flex-shrink: 0;
+      background: #222;
+    }
+
+    .detail-title-col {
+      flex: 1;
+    }
+
+    .detail-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .detail-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .detail-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    /* Episode Selector for Series / Anime */
+    .episodes-section {
+      margin-top: 28px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+    .season-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .season-btn {
+      background: var(--surface-secondary);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .season-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .episode-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .episode-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .episode-card:hover {
+      background: #E5E7EB;
+    }
+    .episode-thumb-box {
+      position: relative;
+      width: 100px;
+      aspect-ratio: 16 / 9;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #000;
+    }
+    .episode-thumb-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .episode-play-mini {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+    }
+    .episode-text {
+      flex: 1;
+    }
+    .episode-num {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .episode-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .episode-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* =====================================================================
+       FULL-FEATURED VIDEO PLAYER MODAL
+       ===================================================================== */
+    .player-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #000000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .player-modal.active {
+      display: flex;
+    }
+
+    .player-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+
+    #video-element {
+      width: 100%;
+      height: 100%;
+      max-height: 100vh;
+      object-fit: contain;
+    }
+
+    .custom-player-controls {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 25%, transparent 70%, rgba(0,0,0,0.85) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .player-wrapper:hover .custom-player-controls,
+    .custom-player-controls.show-always {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .player-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+    }
+    .player-title-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .player-main-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .player-sub-title {
+      font-size: 13px;
+      color: #CBD5E1;
+    }
+
+    .player-center-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      color: #fff;
+    }
+    .control-round-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #fff;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .control-round-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.08);
+    }
+    .control-round-btn.btn-play-pause {
+      width: 64px;
+      height: 64px;
+      background: var(--primary);
+      box-shadow: 0 4px 18px var(--primary-glow);
+    }
+
+    .player-bottom-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: #fff;
+    }
+
+    .timeline-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .timeline-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.3);
+      outline: none;
+      cursor: pointer;
+    }
+    .timeline-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(0,0,0,0.5);
+    }
+
+    .player-secondary-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .player-left-group, .player-right-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .player-time-display {
+      font-size: 13px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .skip-intro-btn {
+      position: absolute;
+      bottom: 90px;
+      right: 24px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+    .skip-intro-btn:hover {
+      background: rgba(255, 255, 255, 0.9);
+      color: #000;
+    }
+
+    /* =====================================================================
+       DOWNLOADS & OFFLINE VIEW
+       ===================================================================== */
+    .storage-meter-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      box-shadow: var(--card-shadow);
+      margin-top: 10px;
+      margin-bottom: 24px;
+    }
+    .storage-meter-bar {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--surface-secondary);
+      margin: 10px 0 6px;
+      overflow: hidden;
+    }
+    .storage-meter-fill {
+      height: 100%;
+      width: 28%;
+      background: linear-gradient(90deg, var(--primary), #FF5722);
+    }
+
+    /* =====================================================================
+       MEMBERSHIP & VIP PLANS VIEW
+       ===================================================================== */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (min-width: 768px) {
+      .pricing-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    .plan-card {
+      position: relative;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+    }
+    .plan-card.featured-plan {
+      border-color: var(--primary);
+      box-shadow: 0 8px 24px rgba(229, 9, 20, 0.12);
+    }
+    .plan-badge {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+    .plan-price-num {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 12px 0 4px;
+    }
+    .plan-feature-list {
+      list-style: none;
+      margin: 16px 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 13.5px;
+      color: var(--text-secondary);
+    }
+    .plan-feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Redeem Code Box */
+    .redeem-card {
+      background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+      border: 1.5px dashed #F59E0B;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* =====================================================================
+       PROFILE & ACCOUNT SCREEN
+       ===================================================================== */
+    .profile-hero-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 10px;
+      margin-bottom: 24px;
+    }
+    .profile-large-avatar {
+      position: relative;
+      width: 76px;
+      height: 76px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 3px solid #FFFFFF;
+      box-shadow: var(--float-shadow);
+      background: #E5E7EB;
+      flex-shrink: 0;
+    }
+    .profile-large-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-menu-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 24px;
+    }
+    .profile-menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      font-size: 14.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s ease;
+    }
+    .profile-menu-item:last-child {
+      border-bottom: none;
+    }
+    .profile-menu-item:hover {
+      background: var(--surface-secondary);
+    }
+    .menu-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* =====================================================================
+       CHAT & SUPPORT VIEW
+       ===================================================================== */
+    .support-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+    .faq-question {
+      font-size: 14.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .faq-answer {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      line-height: 1.5;
+      display: none;
+    }
+    .faq-item.open .faq-answer {
+      display: block;
+    }
+
+    .chat-messages-container {
+      height: 320px;
+      overflow-y: auto;
+      padding: 12px;
+      background: var(--surface-secondary);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .chat-bubble {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13.5px;
+      line-height: 1.4;
+    }
+    .chat-bubble.incoming {
+      align-self: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+    .chat-bubble.outgoing {
+      align-self: flex-end;
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* =====================================================================
+       18+ AGE RESTRICTION GATE MODAL
+       ===================================================================== */
+    .age-gate-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      background: var(--modal-backdrop);
+      backdrop-filter: blur(14px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .age-gate-modal.active {
+      display: flex;
+    }
+    .age-gate-box {
+      background: #FFFFFF;
+      border-radius: var(--radius-xl);
+      padding: 30px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: var(--float-shadow);
+      border: 1px solid var(--border);
+    }
+
+    /* =====================================================================
+       TOAST NOTIFICATIONS
+       ===================================================================== */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 120;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast-item {
+      pointer-events: auto;
+      background: rgba(23, 23, 23, 0.95);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideInRight 0.25s ease;
+    }
+    @keyframes slideInRight {
+      from { transform: translateX(50px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Generic Auth Modal */
+    .auth-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 98;
+      background: var(--modal-backdrop);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .auth-modal.active {
+      display: flex;
+    }
+    .auth-box {
+      background: #FFFFFF;
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: var(--float-shadow);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .form-control {
+      background: var(--surface-secondary);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      font-size: 14px;
+      outline: none;
+      color: var(--text-primary);
+      transition: border 0.2s ease;
+    }
+    .form-control:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =====================================================================
+       TOP APP BAR
+       ===================================================================== -->
+  <header class="top-app-bar" id="app-header">
+    <div class="brand-wrap" onclick="App.navigateTo('home')">
+      <div class="brand-logo">
+        <div class="brand-badge">M</div>
+        <div class="brand-name">MR<span>Flix</span></div>
+      </div>
+      <div class="app-status-badge" id="firebase-status-badge" title="Firebase Connection Status">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">Connecting...</span>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="vip-pill-btn" onclick="App.navigateTo('membership')" id="top-vip-btn">
+        <i data-lucide="crown" style="width: 14px; height: 14px;"></i>
+        <span id="vip-btn-text">VIP Pass</span>
+      </button>
+
+      <button class="icon-btn" onclick="App.openNotificationsModal()" aria-label="Notifications">
+        <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
+        <span class="badge-counter" id="unread-notifications-count" style="display:none;">3</span>
+      </button>
+
+      <div class="user-avatar-btn" onclick="App.onUserAvatarClick()" id="top-avatar-box">
+        <img id="top-avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Profile">
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       MAIN VIEWPORT
+       ===================================================================== -->
+  <main class="main-viewport">
+
+    <!-- ==================== TAB 1: HOME VIEW ==================== -->
+    <section id="view-home" class="view-screen active">
+      <!-- Category Filter Pills -->
+      <div class="filter-bar">
+        <button class="chip-btn active" onclick="App.filterHomeCategory('all')"><i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> All</button>
+        <button class="chip-btn" onclick="App.filterHomeCategory('movie')"><i data-lucide="film" style="width: 14px; height: 14px;"></i> Movies</button>
+        <button class="chip-btn" onclick="App.filterHomeCategory('series')"><i data-lucide="tv" style="width: 14px; height: 14px;"></i> Web Series</button>
+        <button class="chip-btn" onclick="App.filterHomeCategory('anime')"><i data-lucide="play-circle" style="width: 14px; height: 14px;"></i> Anime</button>
+        <button class="chip-btn" onclick="App.filterHomeCategory('live')"><i data-lucide="radio" style="width: 14px; height: 14px;"></i> Live TV</button>
+        <button class="chip-btn" onclick="App.filterHomeCategory('vip')"><i data-lucide="crown" style="width: 14px; height: 14px;"></i> VIP Premium</button>
+      </div>
+
+      <!-- Featured Movie Hero Carousel -->
+      <div class="hero-carousel-container" id="hero-carousel">
+        <div id="hero-slides-wrapper">
+          <!-- Dynamic Hero Slides Injected Here -->
+        </div>
+        <div class="hero-dots" id="hero-dots-container"></div>
+      </div>
+
+      <!-- Continue Watching Rail (Auth/Guest) -->
+      <div class="content-section" id="continue-watching-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-accent"></span>
+            <h2 class="section-title">Continue Watching</h2>
+          </div>
+          <span class="see-all-link" onclick="App.clearContinueWatching()">Clear All</span>
+        </div>
+        <div class="horizontal-rail" id="continue-watching-rail">
+          <!-- Continue watching cards -->
+        </div>
+      </div>
+
+      <!-- Trending Now -->
+      <div class="content-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-accent"></span>
+            <h2 class="section-title">Trending Now</h2>
+          </div>
+          <a class="see-all-link" onclick="App.openCategoryGrid('trending')">Explore More <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i></a>
+        </div>
+        <div class="horizontal-rail" id="trending-rail">
+          <!-- Trending items -->
+        </div>
+      </div>
+
+      <!-- Popular Movies -->
+      <div class="content-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-accent"></span>
+            <h2 class="section-title">Popular Movies</h2>
+          </div>
+          <a class="see-all-link" onclick="App.openCategoryGrid('movie')">View All <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i></a>
+        </div>
+        <div class="horizontal-rail" id="popular-movies-rail">
+          <!-- Movies -->
+        </div>
+      </div>
+
+      <!-- Binge-Worthy Web Series & TV Shows -->
+      <div class="content-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-accent"></span>
+            <h2 class="section-title">Top Web Series & Shows</h2>
+          </div>
+          <a class="see-all-link" onclick="App.openCategoryGrid('series')">View All <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i></a>
+        </div>
+        <div class="horizontal-rail" id="web-series-rail">
+          <!-- Web series -->
+        </div>
+      </div>
+
+      <!-- Anime Spotlight -->
+      <div class="content-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-accent"></span>
+            <h2 class="section-title">Anime Universe</h2>
+          </div>
+          <a class="see-all-link" onclick="App.openCategoryGrid('anime')">View All <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i></a>
+        </div>
+        <div class="horizontal-rail" id="anime-rail">
+          <!-- Anime -->
+        </div>
+      </div>
+
+      <!-- Live TV Streams -->
+      <div class="content-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-accent"></span>
+            <h2 class="section-title">24/7 Live Broadcasts</h2>
+          </div>
+          <span class="live-badge"><span class="live-pulsing-dot"></span> LIVE NOW</span>
+        </div>
+        <div class="horizontal-rail" id="live-tv-rail">
+          <!-- Live Channels -->
+        </div>
+      </div>
+
+      <!-- VIP / Premium Exclusive Rail -->
+      <div class="content-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-accent" style="background: var(--gold);"></span>
+            <h2 class="section-title">VIP Exclusive Cinema</h2>
+          </div>
+          <span class="see-all-link" onclick="App.navigateTo('membership')">Unlock VIP <i data-lucide="crown" style="width: 14px; height: 14px;"></i></span>
+        </div>
+        <div class="horizontal-rail" id="vip-exclusive-rail">
+          <!-- VIP Content -->
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==================== TAB 2: SEARCH VIEW ==================== -->
+    <section id="view-search" class="view-screen">
+      <div class="search-header-box">
+        <div class="search-input-wrap">
+          <i data-lucide="search" style="color: var(--text-secondary); width: 20px; height: 20px;"></i>
+          <input type="text" id="main-search-input" placeholder="Search movies, web series, anime, actors..." autocomplete="off">
+          <button class="icon-btn" id="search-clear-btn" style="display:none; width: 28px; height: 28px; border:none;" onclick="App.clearSearch()">
+            <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+          </button>
+        </div>
+
+        <div class="search-tabs-row">
+          <button class="search-subtab active" onclick="App.switchSearchMode('catalogue')">MRFlix Catalogue</button>
+          <button class="search-subtab" onclick="App.switchSearchMode('tmdb')">TMDB Global Metadata</button>
+        </div>
+
+        <!-- Filter tags -->
+        <div class="filter-bar" style="padding-top: 10px;">
+          <button class="chip-btn active" onclick="App.filterSearchResult('all')">All</button>
+          <button class="chip-btn" onclick="App.filterSearchResult('Action')">Action</button>
+          <button class="chip-btn" onclick="App.filterSearchResult('Sci-Fi')">Sci-Fi</button>
+          <button class="chip-btn" onclick="App.filterSearchResult('Drama')">Drama</button>
+          <button class="chip-btn" onclick="App.filterSearchResult('Anime')">Anime</button>
+          <button class="chip-btn" onclick="App.filterSearchResult('Thriller')">Thriller</button>
+          <button class="chip-btn" onclick="App.filterSearchResult('Comedy')">Comedy</button>
+        </div>
+      </div>
+
+      <div class="grid-results" id="search-results-grid">
+        <!-- Rendered results -->
+      </div>
+    </section>
+
+
+    <!-- ==================== TAB 3: DOWNLOADS VIEW ==================== -->
+    <section id="view-download" class="view-screen">
+      <div class="storage-meter-box">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 800;">Downloaded Content</h3>
+            <p style="font-size: 12.5px; color: var(--text-secondary);">Offline storage ready for mobile viewing</p>
+          </div>
+          <span style="font-size: 13px; font-weight: 700; color: var(--primary);">1.8 GB / 32 GB</span>
+        </div>
+        <div class="storage-meter-bar">
+          <div class="storage-meter-fill"></div>
+        </div>
+      </div>
+
+      <div class="grid-results" id="downloaded-items-grid">
+        <!-- Download cards -->
+      </div>
+    </section>
+
+
+    <!-- ==================== TAB 4: COMING SOON VIEW ==================== -->
+    <section id="view-coming-soon" class="view-screen">
+      <div style="margin: 16px 0 20px;">
+        <h2 style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">Upcoming Releases</h2>
+        <p style="font-size: 13.5px; color: var(--text-secondary);">Set reminders and watch trailers for upcoming titles</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 20px;" id="upcoming-items-container">
+        <!-- Upcoming items list -->
+      </div>
+    </section>
+
+
+    <!-- ==================== TAB 5: 18+ MATURE CONTENT VIEW ==================== -->
+    <section id="view-mature" class="view-screen">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin: 16px 0 20px;">
+        <div>
+          <h2 style="font-size: 22px; font-weight: 800; color: #111;">Mature & Noir (18+)</h2>
+          <p style="font-size: 13px; color: var(--text-secondary);">Age-restricted psychological thrillers, dark crime & mature anime</p>
+        </div>
+        <span class="mature-badge-mini" style="font-size: 12px; padding: 4px 8px;">18+ RESTRICTED</span>
+      </div>
+
+      <div class="grid-results" id="mature-results-grid">
+        <!-- 18+ content cards -->
+      </div>
+    </section>
+
+
+    <!-- ==================== TAB 6: CHAT & SUPPORT VIEW ==================== -->
+    <section id="view-chat" class="view-screen">
+      <div class="support-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+          <div>
+            <h3 style="font-size: 17px; font-weight: 800;">MRFlix Support & Help Desk</h3>
+            <p style="font-size: 12.5px; color: var(--text-secondary);">Instant automated assistance & Admin contact</p>
+          </div>
+          <span class="app-status-badge"><span class="status-dot"></span> Admin Online</span>
+        </div>
+
+        <div class="chat-messages-container" id="support-chat-container">
+          <div class="chat-bubble incoming">
+            👋 Welcome to MRFlix Support! How can we assist your streaming experience today? You can report an issue, inquire about VIP membership, or ask about playback.
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+          <input type="text" id="chat-user-input" class="form-control" style="flex:1;" placeholder="Type your support inquiry...">
+          <button class="btn-primary" onclick="App.sendChatMessage()"><i data-lucide="send" style="width: 16px; height: 16px;"></i> Send</button>
+        </div>
+      </div>
+
+      <div class="support-card">
+        <h4 style="font-size: 15px; font-weight: 800; margin-bottom: 12px;">Frequently Asked Questions</h4>
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            <span>How do I activate VIP Membership?</span>
+            <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+          </div>
+          <div class="faq-answer">
+            You can upgrade from the Membership tab, or redeem an exclusive promo voucher like <code>MRFLIX-VIP30</code> to get free instant VIP access!
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            <span>Can I download movies to watch offline?</span>
+            <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+          </div>
+          <div class="faq-answer">
+            Yes! VIP and Standard members can download eligible titles directly to their device storage by clicking the "Download" button on any movie detail page.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            <span>What video streaming formats are supported?</span>
+            <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+          </div>
+          <div class="faq-answer">
+            MRFlix supports direct high-definition MP4 streams as well as adaptive HLS (.m3u8) streams for uninterrupted, buffer-free playback across all devices.
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==================== TAB 7: PROFILE & MEMBERSHIP VIEW ==================== -->
+    <section id="view-profile" class="view-screen">
+      <div class="profile-hero-card">
+        <div class="profile-large-avatar" onclick="App.openAvatarPicker()">
+          <img id="profile-page-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80" alt="User Avatar">
+        </div>
+        <div style="flex:1;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h2 id="profile-page-name" style="font-size: 20px; font-weight: 800;">Toxic Boss</h2>
+            <span class="tag-badge vip" id="profile-vip-tag">VIP Member</span>
+          </div>
+          <p id="profile-page-email" style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">toxicbossmr@gmail.com</p>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Membership: <strong id="profile-expiry-text">Active (Renewal: Nov 2026)</strong></p>
+        </div>
+      </div>
+
+      <!-- Quick stats row -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;">
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; text-align:center; cursor:pointer;" onclick="App.openFavoritesModal()">
+          <div id="stat-favorites-count" style="font-size: 20px; font-weight: 800; color: var(--primary);">8</div>
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">My List</div>
+        </div>
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; text-align:center;">
+          <div id="stat-history-count" style="font-size: 20px; font-weight: 800; color: var(--text-primary);">14</div>
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">History</div>
+        </div>
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; text-align:center;" onclick="App.navigateTo('download')">
+          <div id="stat-download-count" style="font-size: 20px; font-weight: 800; color: var(--text-primary);">4</div>
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Downloads</div>
+        </div>
+      </div>
+
+      <!-- Settings & Actions list -->
+      <div class="profile-menu-list">
+        <div class="profile-menu-item" onclick="App.navigateTo('membership')">
+          <div class="menu-left">
+            <i data-lucide="crown" style="color: var(--gold); width: 20px; height: 20px;"></i>
+            <span>Membership Plans & VIP Status</span>
+          </div>
+          <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+        </div>
+        <div class="profile-menu-item" onclick="App.openFavoritesModal()">
+          <div class="menu-left">
+            <i data-lucide="heart" style="color: var(--primary); width: 20px; height: 20px;"></i>
+            <span>My Favorites / Watchlist</span>
+          </div>
+          <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+        </div>
+        <div class="profile-menu-item" onclick="App.openRedeemModal()">
+          <div class="menu-left">
+            <i data-lucide="gift" style="color: #8B5CF6; width: 20px; height: 20px;"></i>
+            <span>Redeem Promo Code</span>
+          </div>
+          <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+        </div>
+        <div class="profile-menu-item" onclick="App.openEditProfileModal()">
+          <div class="menu-left">
+            <i data-lucide="user-check" style="color: #3B82F6; width: 20px; height: 20px;"></i>
+            <span>Edit Profile & Display Name</span>
+          </div>
+          <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+        </div>
+        <div class="profile-menu-item" onclick="App.openAdminSyncHelper()">
+          <div class="menu-left">
+            <i data-lucide="database" style="color: var(--success); width: 20px; height: 20px;"></i>
+            <span>Firebase & Admin Synchronization</span>
+          </div>
+          <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+        </div>
+        <div class="profile-menu-item" onclick="App.handleAuthAction()" style="color: var(--danger);">
+          <div class="menu-left">
+            <i data-lucide="log-out" style="color: var(--danger); width: 20px; height: 20px;"></i>
+            <span id="logout-menu-label">Sign Out</span>
+          </div>
+          <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==================== DEDICATED MEMBERSHIP VIEW ==================== -->
+    <section id="view-membership" class="view-screen">
+      <div style="margin: 16px 0 20px; text-align: center;">
+        <span class="tag-badge vip" style="margin-bottom: 8px;">UNLIMITED ENTERTAINMENT</span>
+        <h2 style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Choose Your MRFlix Plan</h2>
+        <p style="font-size: 14px; color: var(--text-secondary); max-width: 500px; margin: 6px auto 0;">Enjoy Ultra HD 4K, ad-free streaming, offline downloads and early releases.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Free Plan -->
+        <div class="plan-card">
+          <div>
+            <h3 style="font-size: 18px; font-weight: 800;">Free Basic</h3>
+            <p style="font-size: 13px; color: var(--text-secondary);">Ad-supported standard catalogue</p>
+            <div class="plan-price-num">$0 <span style="font-size: 14px; font-weight: 500; color: var(--text-muted);">/ month</span></div>
+            <ul class="plan-feature-list">
+              <li><i data-lucide="check" style="color: var(--success); width: 16px; height: 16px;"></i> 720p HD Streaming</li>
+              <li><i data-lucide="check" style="color: var(--success); width: 16px; height: 16px;"></i> 1 Concurrent Screen</li>
+              <li><i data-lucide="x" style="color: var(--danger); width: 16px; height: 16px;"></i> No Offline Downloads</li>
+              <li><i data-lucide="x" style="color: var(--danger); width: 16px; height: 16px;"></i> No VIP Exclusives</li>
+            </ul>
+          </div>
+          <button class="btn-secondary" style="color:var(--text-primary); border-color:var(--border);" onclick="App.selectPlan('free')">Current Plan</button>
+        </div>
+
+        <!-- Standard Plan -->
+        <div class="plan-card">
+          <div>
+            <h3 style="font-size: 18px; font-weight: 800;">Standard</h3>
+            <p style="font-size: 13px; color: var(--text-secondary);">Full HD for family entertainment</p>
+            <div class="plan-price-num">$9.99 <span style="font-size: 14px; font-weight: 500; color: var(--text-muted);">/ month</span></div>
+            <ul class="plan-feature-list">
+              <li><i data-lucide="check" style="color: var(--success); width: 16px; height: 16px;"></i> 1080p Full HD</li>
+              <li><i data-lucide="check" style="color: var(--success); width: 16px; height: 16px;"></i> 2 Screens simultaneously</li>
+              <li><i data-lucide="check" style="color: var(--success); width: 16px; height: 16px;"></i> Ad-free experience</li>
+              <li><i data-lucide="check" style="color: var(--success); width: 16px; height: 16px;"></i> Unlimited Downloads</li>
+            </ul>
+          </div>
+          <button class="btn-primary" onclick="App.selectPlan('standard')">Upgrade to Standard</button>
+        </div>
+
+        <!-- VIP Premium Plan -->
+        <div class="plan-card featured-plan">
+          <span class="plan-badge">MOST POPULAR</span>
+          <div>
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--primary);">VIP Premium 4K</h3>
+            <p style="font-size: 13px; color: var(--text-secondary);">Cinema grade 4K HDR + Dolby Atmos</p>
+            <div class="plan-price-num">$19.99 <span style="font-size: 14px; font-weight: 500; color: var(--text-muted);">/ month</span></div>
+            <ul class="plan-feature-list">
+              <li><i data-lucide="check" style="color: var(--success); width: 16px; height: 16px;"></i> 4K Ultra HD + HDR10</li>
+              <li><i data-lucide="check" style="color: var(--success); width: 16px; height: 16px;"></i> 4 Screens simultaneously</li>
+              <li><i data-lucide="check" style="color: var(--success); width: 16px; height: 16px;"></i> VIP Exclusive Premieires</li>
+              <li><i data-lucide="check" style="color: var(--success); width: 16px; height: 16px;"></i> High Speed Offline Downloads</li>
+            </ul>
+          </div>
+          <button class="btn-primary" onclick="App.selectPlan('vip')">Get VIP Access</button>
+        </div>
+      </div>
+
+      <!-- Quick Redeem Code Box -->
+      <div class="redeem-card">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="gift" style="color: var(--gold); width: 22px; height: 22px;"></i>
+          <h4 style="font-size: 16px; font-weight: 800; color: #92400E;">Have an Admin Voucher or Promo Code?</h4>
+        </div>
+        <p style="font-size: 13px; color: #78350F;">Redeem code provided by the administrator (e.g. <code>MRFLIX-VIP30</code>) to activate VIP membership instantly without payment.</p>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="membership-redeem-input" class="form-control" style="text-transform:uppercase; font-weight:700;" placeholder="Enter Promo Code">
+          <button class="btn-primary" style="background:#D97706;" onclick="App.redeemFromMembership()">Redeem</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================================
+       FLOATING BOTTOM NAVIGATION BAR (7 Items)
+       ===================================================================== -->
+  <div class="bottom-nav-wrap">
+    <nav class="bottom-nav">
+      <!-- 1. Search -->
+      <button class="nav-tab" id="tab-search" onclick="App.navigateTo('search')">
+        <i data-lucide="search"></i>
+        <span>Search</span>
+      </button>
+
+      <!-- 2. Download -->
+      <button class="nav-tab" id="tab-download" onclick="App.navigateTo('download')">
+        <i data-lucide="download"></i>
+        <span>Downloads</span>
+      </button>
+
+      <!-- 3. Coming Soon -->
+      <button class="nav-tab" id="tab-coming-soon" onclick="App.navigateTo('coming-soon')">
+        <i data-lucide="calendar"></i>
+        <span>Upcoming</span>
+      </button>
+
+      <!-- 4. Home (Default active, center bubble) -->
+      <button class="nav-tab home-tab active" id="tab-home" onclick="App.navigateTo('home')">
+        <div class="home-bubble">
+          <i data-lucide="home"></i>
+        </div>
+        <span>Home</span>
+      </button>
+
+      <!-- 5. 18+ -->
+      <button class="nav-tab" id="tab-mature" onclick="App.navigateToMature()">
+        <span class="mature-badge-mini">18+</span>
+        <span>Adult</span>
+      </button>
+
+      <!-- 6. Chat -->
+      <button class="nav-tab" id="tab-chat" onclick="App.navigateTo('chat')">
+        <i data-lucide="message-square"></i>
+        <span>Support</span>
+      </button>
+
+      <!-- 7. Profile -->
+      <button class="nav-tab" id="tab-profile" onclick="App.navigateTo('profile')">
+        <i data-lucide="user"></i>
+        <span>Profile</span>
+      </button>
+    </nav>
+  </div>
+
+
+  <!-- =====================================================================
+       MOVIE / CONTENT DETAIL MODAL
+       ===================================================================== -->
+  <div class="detail-overlay" id="detail-modal" onclick="App.handleOverlayBackdropClick(event)">
+    <div class="detail-card" id="detail-card-content">
+      <button class="detail-close-btn" onclick="App.closeDetailModal()">
+        <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+      </button>
+
+      <div class="detail-backdrop-box">
+        <img id="detail-backdrop-img" src="" alt="Backdrop">
+        <div class="detail-backdrop-gradient"></div>
+      </div>
+
+      <div class="detail-body">
+        <div class="detail-header-flex">
+          <img id="detail-poster-img" class="detail-poster-thumbnail" src="" alt="Poster">
+          <div class="detail-title-col">
+            <div id="detail-badges-row" style="display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap;"></div>
+            <h1 class="detail-title" id="detail-title">Movie Title</h1>
+            <div class="detail-meta-row">
+              <span id="detail-year">2026</span>
+              <span>•</span>
+              <span id="detail-runtime">2h 15m</span>
+              <span>•</span>
+              <span id="detail-rating-pill" style="color:var(--gold); font-weight:800; display:inline-flex; align-items:center; gap:3px;">
+                <i data-lucide="star" style="width:13px; height:13px; fill:var(--gold);"></i> 8.7
+              </span>
+              <span>•</span>
+              <span id="detail-quality-pill" class="tag-badge quality" style="color:var(--text-primary); border:1px solid var(--border);">4K UHD</span>
+            </div>
+
+            <div class="detail-actions-bar">
+              <button class="btn-primary" id="detail-play-btn" onclick="App.playCurrentDetailMedia()">
+                <i data-lucide="play" style="width: 18px; height: 18px; fill: #fff;"></i> Play Now
+              </button>
+              <button class="btn-secondary" id="detail-trailer-btn" style="color:var(--text-primary); border-color:var(--border);" onclick="App.watchTrailer()">
+                <i data-lucide="video" style="width: 16px; height: 16px;"></i> Trailer
+              </button>
+              <button class="btn-icon-circle" id="detail-fav-btn" style="color:var(--text-primary); border-color:var(--border);" onclick="App.toggleCurrentDetailFavorite()" title="Add to My List">
+                <i data-lucide="plus" id="detail-fav-icon" style="width: 18px; height: 18px;"></i>
+              </button>
+              <button class="btn-icon-circle" style="color:var(--text-primary); border-color:var(--border);" onclick="App.downloadCurrentDetailMedia()" title="Download">
+                <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+              </button>
+              <button class="btn-icon-circle" style="color:var(--text-primary); border-color:var(--border);" onclick="App.shareCurrentDetailMedia()" title="Share">
+                <i data-lucide="share-2" style="width: 18px; height: 18px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+          <h4 style="font-size: 14px; font-weight: 800; color: var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">Synopsis</h4>
+          <p id="detail-overview" style="font-size: 14.5px; line-height: 1.6; color: var(--text-primary); margin-top: 6px;"></p>
+        </div>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; font-size: 13.5px; border-top: 1px solid var(--border); padding-top: 14px;">
+          <div><strong style="color:var(--text-secondary);">Audio:</strong> <span id="detail-audio">English [Original], Spanish, Hindi</span></div>
+          <div><strong style="color:var(--text-secondary);">Subtitles:</strong> <span id="detail-subs">English, Spanish, French, German</span></div>
+          <div><strong style="color:var(--text-secondary);">Genres:</strong> <span id="detail-genres">Sci-Fi, Action, Adventure</span></div>
+        </div>
+
+        <!-- Episodes List for Web Series / Anime -->
+        <div class="episodes-section" id="detail-episodes-section" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3 style="font-size: 17px; font-weight: 800;">Episodes</h3>
+            <div class="season-selector" id="season-selector-container">
+              <button class="season-btn active">Season 1</button>
+              <button class="season-btn">Season 2</button>
+            </div>
+          </div>
+          <div class="episode-list" id="episodes-list-container">
+            <!-- Dynamic Episode Cards -->
+          </div>
+        </div>
+
+        <!-- Related Recommendations -->
+        <div style="margin-top: 28px; border-top: 1px solid var(--border); padding-top: 20px;">
+          <h3 style="font-size: 17px; font-weight: 800; margin-bottom: 12px;">More Like This</h3>
+          <div class="horizontal-rail" id="detail-related-rail">
+            <!-- Related items -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =====================================================================
+       FULLSCREEN VIDEO PLAYER
+       ===================================================================== -->
+  <div class="player-modal" id="video-player-modal">
+    <div class="player-wrapper" id="player-container">
+      <video id="video-element" playsinline preload="metadata" crossorigin="anonymous"></video>
+
+      <div class="custom-player-controls" id="custom-controls">
+        <div class="player-top-bar">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button class="control-round-btn" onclick="App.closeVideoPlayer()">
+              <i data-lucide="arrow-left" style="width: 22px; height: 22px;"></i>
+            </button>
+            <div class="player-title-info">
+              <span class="player-main-title" id="player-title">Movie Title</span>
+              <span class="player-sub-title" id="player-subtitle">1080p Full HD • Dolby 5.1</span>
+            </div>
+          </div>
+          <button class="control-round-btn" onclick="App.reportPlaybackIssue()" title="Report Playback Issue">
+            <i data-lucide="flag" style="width: 18px; height: 18px;"></i>
+          </button>
+        </div>
+
+        <!-- Center 10s Rewind / Play-Pause / 10s Forward -->
+        <div class="player-center-actions">
+          <button class="control-round-btn" onclick="App.playerSeekRelative(-10)" title="Rewind 10s">
+            <i data-lucide="rotate-ccw" style="width: 24px; height: 24px;"></i>
+          </button>
+          <button class="control-round-btn btn-play-pause" id="player-center-play-btn" onclick="App.togglePlayPause()">
+            <i data-lucide="play" id="center-play-icon" style="width: 32px; height: 32px; fill: #fff;"></i>
+          </button>
+          <button class="control-round-btn" onclick="App.playerSeekRelative(10)" title="Forward 10s">
+            <i data-lucide="rotate-cw" style="width: 24px; height: 24px;"></i>
+          </button>
+        </div>
+
+        <!-- Skip Intro Button (appears during intro window) -->
+        <button class="skip-intro-btn" id="player-skip-intro-btn" style="display:none;" onclick="App.skipIntro()">
+          Skip Intro →
+        </button>
+
+        <div class="player-bottom-bar">
+          <div class="timeline-slider-row">
+            <span class="player-time-display" id="player-current-time">00:00</span>
+            <input type="range" class="timeline-slider" id="player-timeline" min="0" max="100" value="0">
+            <span class="player-time-display" id="player-duration">00:00</span>
+          </div>
+
+          <div class="player-secondary-controls">
+            <div class="player-left-group">
+              <button class="control-round-btn" style="width:36px; height:36px;" onclick="App.togglePlayPause()">
+                <i data-lucide="play" id="bottom-play-icon" style="width: 18px; height: 18px;"></i>
+              </button>
+              <button class="control-round-btn" style="width:36px; height:36px;" onclick="App.toggleMute()">
+                <i data-lucide="volume-2" id="volume-icon" style="width: 18px; height: 18px;"></i>
+              </button>
+              <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" style="width: 70px; accent-color: var(--primary);">
+            </div>
+
+            <div class="player-right-group">
+              <select id="playback-speed-select" onchange="App.setPlaybackSpeed(this.value)" style="background:rgba(255,255,255,0.15); color:#fff; border:none; padding:4px 8px; border-radius:6px; font-weight:700; font-size:12px; outline:none;">
+                <option value="0.75" style="color:#000;">0.75x</option>
+                <option value="1" selected style="color:#000;">1.0x</option>
+                <option value="1.25" style="color:#000;">1.25x</option>
+                <option value="1.5" style="color:#000;">1.5x</option>
+                <option value="2" style="color:#000;">2.0x</option>
+              </select>
+
+              <button class="control-round-btn" style="width:36px; height:36px;" onclick="App.togglePlayerFullscreen()" title="Fullscreen">
+                <i data-lucide="maximize" id="fullscreen-icon" style="width: 18px; height: 18px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =====================================================================
+       AGE GATE RESTRICTION MODAL (18+)
+       ===================================================================== -->
+  <div class="age-gate-modal" id="age-gate-modal">
+    <div class="age-gate-box">
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: #FEE2E2; color: var(--danger); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+        <i data-lucide="shield-alert" style="width: 30px; height: 30px;"></i>
+      </div>
+      <h3 style="font-size: 20px; font-weight: 800; color: #111;">Age Verification Required</h3>
+      <p style="font-size: 13.5px; color: var(--text-secondary); margin: 8px 0 20px; line-height: 1.5;">
+        This section contains adult themes, mature psychological thrillers, and violence rated 18+. You must be at least 18 years old to proceed.
+      </p>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-secondary" style="flex:1; color:var(--text-primary); border-color:var(--border);" onclick="App.declineAgeGate()">Cancel</button>
+        <button class="btn-primary" style="flex:1;" onclick="App.acceptAgeGate()">I am 18 or Older</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =====================================================================
+       FIREBASE AUTH MODAL (Sign In / Register / Forgot Password)
+       ===================================================================== -->
+  <div class="auth-modal" id="auth-modal" onclick="App.handleAuthModalBackdrop(event)">
+    <div class="auth-box">
+      <button class="detail-close-btn" style="top:12px; right:12px; background:#F3F4F6; color:#111;" onclick="App.closeAuthModal()">
+        <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+      </button>
+
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div class="brand-badge" style="margin: 0 auto 8px;">M</div>
+        <h3 id="auth-modal-title" style="font-size: 20px; font-weight: 800;">Welcome to MRFlix</h3>
+        <p id="auth-modal-subtitle" style="font-size: 13px; color: var(--text-secondary);">Sign in to access your Watchlist & VIP benefits</p>
+      </div>
+
+      <form id="auth-form" onsubmit="App.handleAuthSubmit(event)">
+        <div class="form-group" id="auth-name-group" style="display:none;">
+          <label>Full Name</label>
+          <input type="text" id="auth-input-name" class="form-control" placeholder="Enter your display name">
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="auth-input-email" class="form-control" placeholder="name@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="auth-input-password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn-primary" id="auth-submit-btn" style="width:100%; justify-content:center; margin-top:10px;">
+          Sign In
+        </button>
+      </form>
+
+      <div style="margin-top: 16px; text-align: center; font-size: 13px; color: var(--text-secondary);">
+        <span id="auth-switch-prompt">Don't have an account?</span>
+        <a href="javascript:void(0)" onclick="App.toggleAuthMode()" id="auth-switch-link" style="color:var(--primary); font-weight:700; margin-left:4px;">Sign Up</a>
+      </div>
+
+      <div style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; text-align: center;">
+        <button type="button" class="btn-secondary" style="width: 100%; justify-content: center; color: var(--text-primary); border-color: var(--border);" onclick="App.loginDemoAccount()">
+          <i data-lucide="sparkles" style="width: 16px; height: 16px; color: var(--gold);"></i> Sign in with Demo Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =====================================================================
+       REDEEM PROMO CODE MODAL
+       ===================================================================== -->
+  <div class="auth-modal" id="redeem-modal">
+    <div class="auth-box">
+      <button class="detail-close-btn" style="top:12px; right:12px; background:#F3F4F6; color:#111;" onclick="App.closeRedeemModal()">
+        <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+      </button>
+
+      <div style="text-align: center; margin-bottom: 18px;">
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">
+          <i data-lucide="gift" style="width: 24px; height: 24px;"></i>
+        </div>
+        <h3 style="font-size: 20px; font-weight: 800;">Redeem MRFlix Code</h3>
+        <p style="font-size: 13px; color: var(--text-secondary);">Enter a promo code or voucher to unlock privileges</p>
+      </div>
+
+      <div class="form-group">
+        <label>Promo Code</label>
+        <input type="text" id="modal-redeem-input" class="form-control" style="text-transform: uppercase; font-weight: 700; letter-spacing: 1px;" placeholder="e.g. MRFLIX-VIP30">
+      </div>
+
+      <button class="btn-primary" style="width:100%; justify-content:center;" onclick="App.processRedeemCode()">
+        Verify & Redeem
+      </button>
+    </div>
+  </div>
+
+
+  <!-- =====================================================================
+       ADMIN SEED & FIRESTORE SYNC HELPER MODAL
+       ===================================================================== -->
+  <div class="auth-modal" id="admin-sync-modal">
+    <div class="auth-box" style="max-width: 480px;">
+      <button class="detail-close-btn" style="top:12px; right:12px; background:#F3F4F6; color:#111;" onclick="App.closeAdminSyncModal()">
+        <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+      </button>
+
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <i data-lucide="database" style="color:var(--primary); width:24px; height:24px;"></i>
+        <h3 style="font-size: 18px; font-weight: 800;">Firebase Admin Sync Helper</h3>
+      </div>
+      <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+        Connected to Firebase project: <strong>mrflix-3fb8e</strong>.<br>
+        If your Firestore database was freshly provisioned and does not yet contain published movies or series from the Admin Panel, you can populate it with standard seed records with a single click.
+      </p>
+
+      <button class="btn-primary" style="width:100%; justify-content:center; margin-bottom:10px;" onclick="App.seedFirestoreDemoData()">
+        <i data-lucide="upload-cloud" style="width: 16px; height: 16px;"></i> Seed Initial Movies & Series to Firestore
+      </button>
+      <button class="btn-secondary" style="width:100%; justify-content:center; color:var(--text-primary); border-color:var(--border);" onclick="App.reconnectFirebase()">
+        <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i> Force Refresh Real-time Listeners
+      </button>
+    </div>
+  </div>
+
+
+  <!-- =====================================================================
+       NOTIFICATIONS MODAL
+       ===================================================================== -->
+  <div class="auth-modal" id="notifications-modal">
+    <div class="auth-box" style="max-width: 460px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-size: 18px; font-weight: 800;">Notifications</h3>
+        <button class="detail-close-btn" style="position:static; background:#F3F4F6; color:#111; width:30px; height:30px;" onclick="App.closeNotificationsModal()">
+          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
+      <div id="notifications-list-container" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto;">
+        <!-- Notification entries -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =====================================================================
+       TOAST MANAGER CONTAINER
+       ===================================================================== -->
+  <div class="toast-container" id="toast-container"></div>
+
+
+  <!-- =====================================================================
+       APPLICATION SCRIPT (Firebase SDK Modular + Application Engine)
+       ===================================================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged, 
+      signInWithEmailAndPassword, 
+      createUserWithEmailAndPassword, 
+      signOut, 
+      updateProfile 
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      doc, 
+      getDocs, 
+      setDoc, 
+      addDoc, 
+      updateDoc, 
+      deleteDoc, 
+      onSnapshot, 
+      serverTimestamp, 
+      query, 
+      where 
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+    /* ===================================================================
+       FIREBASE CONFIGURATION
+       =================================================================== */
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5d_A4BtAMDohzTr3ZgMEdDjtVwW-aTSs",
+      authDomain: "mrflix-3fb8e.firebaseapp.com",
+      projectId: "mrflix-3fb8e",
+      storageBucket: "mrflix-3fb8e.firebasestorage.app",
+      messagingSenderId: "836670217460",
+      appId: "1:836670217460:web:617715d0480bb9359a52a1"
+    };
+
+    let fbApp, fbAuth, fbDb;
+    let isFirebaseConnected = false;
+
+    try {
+      fbApp = initializeApp(firebaseConfig);
+      fbAuth = getAuth(fbApp);
+      fbDb = getFirestore(fbApp);
+      isFirebaseConnected = true;
+    } catch (err) {
+      console.warn("Firebase initialization notice:", err);
+    }
+
+    /* ===================================================================
+       RICH CURATED HIGH-QUALITY PRODUCTION CATALOGUE (Built-in Seed & Fallback)
+       With verified working playable MP4 and HLS streaming URLs
+       =================================================================== */
+    const SEED_CATALOGUE = [
+      {
+        id: "m-tears-of-steel",
+        type: "movie",
+        title: "Tears of Steel: Cybernetic Frontier",
+        originalTitle: "Tears of Steel",
+        year: 2025,
+        rating: 8.8,
+        runtime: "1h 52m",
+        ageRating: "13+",
+        quality: "4K UHD",
+        genres: ["Sci-Fi", "Action", "Cyberpunk"],
+        audio: "English [5.1], Japanese, Spanish",
+        subtitles: "English, French, German, Spanish",
+        vipOnly: false,
+        featured: true,
+        trending: true,
+        posterUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80",
+        backdropUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1400&auto=format&fit=crop&q=80",
+        overview: "In a dystopian future set in Old Amsterdam, a team of elite scientists and cyborg warriors must recalibrate the global defense grid before an autonomous AI uprising overtakes mankind.",
+        streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+        trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+      },
+      {
+        id: "s-solaris-chronicles",
+        type: "series",
+        title: "Solaris: Deep Horizon",
+        originalTitle: "Solaris Chronicles",
+        year: 2026,
+        rating: 9.1,
+        runtime: "3 Seasons",
+        ageRating: "16+",
+        quality: "4K HDR",
+        genres: ["Sci-Fi", "Drama", "Mystery"],
+        audio: "English, German, Italian",
+        subtitles: "English, Spanish, Hindi",
+        vipOnly: true,
+        featured: true,
+        trending: true,
+        posterUrl: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=600&auto=format&fit=crop&q=80",
+        backdropUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1400&auto=format&fit=crop&q=80",
+        overview: "When an intergalactic research station orbiting an uncharted oceanic planet goes dark, an investigator uncovers cosmic anomalies that reflect humanity's deepest subconscious memories.",
+        streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        episodes: [
+          {
+            id: "ep-101",
+            season: 1,
+            episodeNum: 1,
+            title: "Echoes in the Ocean",
+            runtime: "48m",
+            desc: "Dr. Kelvin arrives at the remote Solaris station and discovers erratic crew behavior and ghostly hallucinations.",
+            thumbUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&auto=format&fit=crop&q=80",
+            streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+          },
+          {
+            id: "ep-102",
+            season: 1,
+            episodeNum: 2,
+            title: "The Ghost in the Orbit",
+            runtime: "52m",
+            desc: "As the planetary magnetic field pulses, physical apparitions of long-lost loved ones materialize aboard.",
+            thumbUrl: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=400&auto=format&fit=crop&q=80",
+            streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+          },
+          {
+            id: "ep-103",
+            season: 1,
+            episodeNum: 3,
+            title: "Event Horizon",
+            runtime: "56m",
+            desc: "The survivors formulate a perilous neutrino bombardment to disrupt the living consciousness of the sea.",
+            thumbUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&auto=format&fit=crop&q=80",
+            streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          }
+        ]
+      },
+      {
+        id: "a-neo-tokyo-shogun",
+        type: "anime",
+        title: "Katanas of Neo-Tokyo",
+        originalTitle: "Shogun 2099",
+        year: 2026,
+        rating: 9.3,
+        runtime: "24 Episodes",
+        ageRating: "16+",
+        quality: "1080p FHD",
+        genres: ["Anime", "Action", "Cyberpunk"],
+        audio: "Japanese [Original], English [Dub]",
+        subtitles: "English, Spanish, Portuguese",
+        vipOnly: false,
+        featured: true,
+        trending: true,
+        posterUrl: "https://images.unsplash.com/photo-1563089145-599997674d42?w=600&auto=format&fit=crop&q=80",
+        backdropUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1400&auto=format&fit=crop&q=80",
+        overview: "In a rain-drenched neon metropolis run by megacorporations, a rogue cyber-ronin wields an ancient plasma blade to protect the last remaining digital archives of Japanese heritage.",
+        streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+        episodes: [
+          {
+            id: "a-ep-1",
+            season: 1,
+            episodeNum: 1,
+            title: "The Neon Rain",
+            runtime: "24m",
+            desc: "Ren uncovers a covert heist targeting the Central Data Vault and draws his blade against corporate syndicate hunters.",
+            thumbUrl: "https://images.unsplash.com/photo-1563089145-599997674d42?w=400&auto=format&fit=crop&q=80",
+            streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
+          },
+          {
+            id: "a-ep-2",
+            season: 1,
+            episodeNum: 2,
+            title: "Way of the Digital Blade",
+            runtime: "25m",
+            desc: "An encounter in the subterranean markets leads Ren to an enigmatic netrunner possessing royal encryption keys.",
+            thumbUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80",
+            streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+          }
+        ]
+      },
+      {
+        id: "m-big-buck-odyssey",
+        type: "movie",
+        title: "Emerald Forest: Kingdom of Light",
+        originalTitle: "Emerald Forest",
+        year: 2024,
+        rating: 8.5,
+        runtime: "1h 38m",
+        ageRating: "PG",
+        quality: "4K UHD",
+        genres: ["Animation", "Family", "Adventure"],
+        audio: "English, French, German",
+        subtitles: "English, Spanish",
+        vipOnly: false,
+        featured: false,
+        trending: true,
+        posterUrl: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop&q=80",
+        backdropUrl: "https://images.unsplash.com/photo-1511497584788-87676104235f?w=1400&auto=format&fit=crop&q=80",
+        overview: "A whimsical, visually dazzling animated fairy tale about an enchanted glade where magical creatures band together to restore the great solar bloom.",
+        streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      },
+      {
+        id: "m-sintel-dragon",
+        type: "movie",
+        title: "Sintel: Wings of the Dragon",
+        originalTitle: "Sintel",
+        year: 2025,
+        rating: 9.0,
+        runtime: "1h 45m",
+        ageRating: "13+",
+        quality: "4K UHD",
+        genres: ["Fantasy", "Adventure", "Drama"],
+        audio: "English, Spanish, Italian",
+        subtitles: "English, French",
+        vipOnly: true,
+        featured: false,
+        trending: true,
+        posterUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80",
+        backdropUrl: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1400&auto=format&fit=crop&q=80",
+        overview: "A lone warrior braves desolate frozen wastelands and perilous peaks on an epic quest to rescue her captured scaled companion from ancient beast-tamers.",
+        streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
+      },
+      {
+        id: "l-cinema-prime",
+        type: "live",
+        title: "MRFlix Cinema HD Live",
+        originalTitle: "MRFlix Live Stream",
+        year: 2026,
+        rating: 9.4,
+        runtime: "24/7 Live",
+        ageRating: "13+",
+        quality: "1080p 60fps",
+        genres: ["Live TV", "Cinema", "Entertainment"],
+        vipOnly: false,
+        featured: false,
+        trending: true,
+        posterUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80",
+        backdropUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1400&auto=format&fit=crop&q=80",
+        overview: "Non-stop curated cinematic trailers, behind the scenes specials, and film festival spotlights streamed 24 hours a day.",
+        streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+      },
+      {
+        id: "x-mature-noir-city",
+        type: "mature",
+        title: "Shadows of Midnight: Red District",
+        originalTitle: "Midnight District",
+        year: 2025,
+        rating: 8.7,
+        runtime: "2h 08m",
+        ageRating: "18+",
+        quality: "4K HDR",
+        genres: ["Thriller", "Crime", "Noir"],
+        audio: "English, Russian",
+        subtitles: "English, Spanish",
+        vipOnly: true,
+        featured: false,
+        trending: false,
+        posterUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop&q=80",
+        backdropUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1400&auto=format&fit=crop&q=80",
+        overview: "A gritty psychological neo-noir thriller unraveling the shadowy corruption of underworld syndicates operating within the velvet clubs of metropolitan underworlds.",
+        streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+      },
+      {
+        id: "u-quantum-matrix",
+        type: "upcoming",
+        title: "Quantum Breach: Genesis",
+        originalTitle: "Quantum Breach",
+        year: 2027,
+        rating: 9.5,
+        runtime: "Coming Nov 2026",
+        ageRating: "13+",
+        quality: "IMAX 4K",
+        genres: ["Sci-Fi", "Action"],
+        releaseDate: "November 28, 2026",
+        vipOnly: false,
+        featured: false,
+        trending: false,
+        posterUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80",
+        backdropUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1400&auto=format&fit=crop&q=80",
+        overview: "The most anticipated science fiction spectacle of 2026. Humanity discovers how to traverse parallel timelines, triggering an unexpected cosmic collision.",
+        streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+      }
+    ];
+
+    /* ===================================================================
+       APPLICATION SINGLETON STATE & CONTROLLER
+       =================================================================== */
+    class MRFlixApp {
+      constructor() {
+        this.currentView = 'home';
+        this.currentUser = null;
+        this.userProfile = {
+          displayName: "Toxic Boss",
+          email: "toxicbossmr@gmail.com",
+          isVip: true,
+          plan: "vip",
+          vipExpires: "Nov 2026",
+          photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
+        };
+        this.catalogue = [...SEED_CATALOGUE];
+        this.favorites = new Set(["m-tears-of-steel", "s-solaris-chronicles"]);
+        this.watchHistory = [
+          {
+            contentId: "m-tears-of-steel",
+            title: "Tears of Steel: Cybernetic Frontier",
+            backdropUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80",
+            progressSeconds: 320,
+            durationSeconds: 720,
+            progressPercent: 44
+          },
+          {
+            contentId: "s-solaris-chronicles",
+            title: "Solaris: Deep Horizon — Ep 1",
+            backdropUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop&q=80",
+            progressSeconds: 540,
+            durationSeconds: 900,
+            progressPercent: 60
+          }
+        ];
+        this.downloads = [
+          {
+            id: "m-tears-of-steel",
+            title: "Tears of Steel: Cybernetic Frontier",
+            size: "1.2 GB",
+            quality: "1080p FHD",
+            posterUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop&q=80",
+            streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+          },
+          {
+            id: "m-big-buck-odyssey",
+            title: "Emerald Forest: Kingdom of Light",
+            size: "650 MB",
+            quality: "720p HD",
+            posterUrl: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&auto=format&fit=crop&q=80",
+            streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          }
+        ];
+        this.notifications = [
+          { id: 1, title: "VIP Access Active!", message: "Your VIP pass is unlocked. Enjoy 4K HDR and downloads.", time: "Just now", unread: true },
+          { id: 2, title: "New Series Premiere", message: "Solaris: Deep Horizon Season 1 is now streaming.", time: "2 hours ago", unread: true },
+          { id: 3, title: "Weekend Showcase", message: "Check out the top trending Cyberpunk anime picks.", time: "Yesterday", unread: false }
+        ];
+
+        this.heroIndex = 0;
+        this.heroTimer = null;
+        this.selectedDetailMedia = null;
+        this.currentPlayingMedia = null;
+        this.is18PlusVerified = false;
+        this.hlsPlayer = null;
+        this.authMode = 'login'; // login | register
+      }
+
+      init() {
+        this.setupEventListeners();
+        this.initFirebaseListeners();
+        this.renderAllViews();
+        this.startHeroCarousel();
+        this.updateAuthUI();
+        lucide.createIcons();
+      }
+
+      setupEventListeners() {
+        // Video player timeline & events
+        const video = document.getElementById('video-element');
+        const timeline = document.getElementById('player-timeline');
+
+        video.addEventListener('timeupdate', () => {
+          if (!video.duration) return;
+          const pct = (video.currentTime / video.duration) * 100;
+          timeline.value = pct;
+          document.getElementById('player-current-time').textContent = this.formatTime(video.currentTime);
+          document.getElementById('player-duration').textContent = this.formatTime(video.duration);
+
+          // Show skip intro button if in 10s - 45s window
+          const skipBtn = document.getElementById('player-skip-intro-btn');
+          if (video.currentTime >= 10 && video.currentTime <= 45) {
+            skipBtn.style.display = 'block';
+          } else {
+            skipBtn.style.display = 'none';
+          }
+        });
+
+        timeline.addEventListener('input', (e) => {
+          if (!video.duration) return;
+          video.currentTime = (e.target.value / 100) * video.duration;
+        });
+
+        // Search live filter
+        const searchInput = document.getElementById('main-search-input');
+        let searchDebounce;
+        searchInput.addEventListener('input', (e) => {
+          clearTimeout(searchDebounce);
+          const clearBtn = document.getElementById('search-clear-btn');
+          clearBtn.style.display = e.target.value ? 'flex' : 'none';
+          searchDebounce = setTimeout(() => {
+            this.executeSearch(e.target.value.trim());
+          }, 250);
+        });
+
+        // Volume control
+        const volumeSlider = document.getElementById('volume-slider');
+        volumeSlider.addEventListener('input', (e) => {
+          video.volume = e.target.value;
+          video.muted = (e.target.value === '0');
+        });
+
+        // Global keyboard shortcuts (Space to toggle play, ESC to close player)
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            this.closeVideoPlayer();
+            this.closeDetailModal();
+            this.closeAuthModal();
+          }
+        });
+      }
+
+      /* ===================================================================
+         FIREBASE REAL-TIME SYNCHRONIZATION
+         =================================================================== */
+      initFirebaseListeners() {
+        const dot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+
+        if (!isFirebaseConnected || !fbDb) {
+          dot.className = 'status-dot offline';
+          statusText.textContent = 'Demo Mode (Offline)';
+          return;
+        }
+
+        // Listen to Auth State
+        onAuthStateChanged(fbAuth, (user) => {
+          if (user) {
+            this.currentUser = user;
+            this.userProfile.email = user.email || this.userProfile.email;
+            this.userProfile.displayName = user.displayName || user.email?.split('@')[0] || "Streamer";
+            this.syncUserFirestoreData(user.uid);
+          } else {
+            this.currentUser = null;
+          }
+          this.updateAuthUI();
+        });
+
+        // Real-time synchronization of published movies from Firestore
+        try {
+          const moviesCol = collection(fbDb, "movies");
+          onSnapshot(moviesCol, (snapshot) => {
+            dot.className = 'status-dot';
+            statusText.textContent = 'Connected to Firestore';
+            if (!snapshot.empty) {
+              const liveMovies = [];
+              snapshot.forEach((doc) => {
+                const data = doc.data();
+                liveMovies.push({ id: doc.id, ...data });
+              });
+              // Merge live movies with default seeds
+              liveMovies.forEach(item => {
+                const idx = this.catalogue.findIndex(c => c.id === item.id);
+                if (idx >= 0) this.catalogue[idx] = item;
+                else this.catalogue.unshift(item);
+              });
+              this.renderAllViews();
+              this.showToast("Real-time content sync updated from Admin Panel!", "success");
+            }
+          }, (error) => {
+            console.warn("Firestore onSnapshot notice:", error.message);
+            dot.className = 'status-dot';
+            statusText.textContent = 'Connected (Local Cache)';
+          });
+        } catch (e) {
+          console.warn("Sync setup error:", e);
+        }
+      }
+
+      async syncUserFirestoreData(uid) {
+        try {
+          // Listen to user favorites
+          const favCol = collection(fbDb, `users/${uid}/favorites`);
+          onSnapshot(favCol, (snap) => {
+            snap.forEach(doc => this.favorites.add(doc.id));
+            this.updateStats();
+          });
+
+          // Listen to user notifications
+          const notifCol = collection(fbDb, `users/${uid}/notifications`);
+          onSnapshot(notifCol, (snap) => {
+            if (!snap.empty) {
+              const notifs = [];
+              snap.forEach(doc => notifs.push({ id: doc.id, ...doc.data() }));
+              this.notifications = notifs;
+              this.updateNotificationsBadge();
+            }
+          });
+        } catch (err) {
+          console.warn("User subcollection listener:", err);
+        }
+      }
+
+      /* ===================================================================
+         VIEW ROUTING & NAVIGATION
+         =================================================================== */
+      navigateTo(viewName) {
+        this.currentView = viewName;
+        document.querySelectorAll('.view-screen').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+        const targetView = document.getElementById(`view-${viewName}`);
+        if (targetView) targetView.classList.add('active');
+
+        const targetTab = document.getElementById(`tab-${viewName}`);
+        if (targetTab) targetTab.classList.add('active');
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        lucide.createIcons();
+      }
+
+      navigateToMature() {
+        if (!this.is18PlusVerified) {
+          document.getElementById('age-gate-modal').classList.add('active');
+        } else {
+          this.navigateTo('mature');
+        }
+      }
+
+      acceptAgeGate() {
+        this.is18PlusVerified = true;
+        document.getElementById('age-gate-modal').classList.remove('active');
+        this.navigateTo('mature');
+        this.showToast("Age confirmed. Welcome to Mature Cinema.", "success");
+      }
+
+      declineAgeGate() {
+        document.getElementById('age-gate-modal').classList.remove('active');
+        this.navigateTo('home');
+      }
+
+      /* ===================================================================
+         RENDERING LOGIC
+         =================================================================== */
+      renderAllViews() {
+        this.renderHeroSlides();
+        this.renderContinueWatching();
+        this.renderHorizontalRails();
+        this.renderSearchResults(this.catalogue);
+        this.renderDownloads();
+        this.renderUpcoming();
+        this.renderMature();
+        this.updateStats();
+        lucide.createIcons();
+      }
+
+      renderHeroSlides() {
+        const heroWrapper = document.getElementById('hero-slides-wrapper');
+        const dotsContainer = document.getElementById('hero-dots-container');
+        const featuredItems = this.catalogue.filter(item => item.featured);
+
+        if (!featuredItems.length) return;
+
+        heroWrapper.innerHTML = featuredItems.map((item, idx) => `
+          <div class="hero-slide ${idx === 0 ? 'active' : ''}" data-index="${idx}">
+            <img class="hero-backdrop" src="${item.backdropUrl}" alt="${item.title}">
+            <div class="hero-gradient"></div>
+            <div class="hero-content">
+              <div class="hero-badges-row">
+                <span class="tag-badge featured">FEATURED PREMIERE</span>
+                ${item.vipOnly ? '<span class="tag-badge vip"><i data-lucide="crown" style="width:12px;height:12px;"></i> VIP ONLY</span>' : ''}
+                <span class="tag-badge quality">${item.quality || '4K UHD'}</span>
+                <span class="tag-badge age">${item.ageRating || '13+'}</span>
+              </div>
+              <h1 class="hero-title">${item.title}</h1>
+              <div class="hero-meta">
+                <span class="star-rating"><i data-lucide="star" style="width:14px;height:14px;fill:#FBBF24;"></i> ${item.rating}</span>
+                <span>•</span>
+                <span>${item.year}</span>
+                <span>•</span>
+                <span>${item.runtime}</span>
+                <span>•</span>
+                <span>${(item.genres || []).join(', ')}</span>
+              </div>
+              <p class="hero-overview">${item.overview}</p>
+              <div class="hero-actions">
+                <button class="btn-primary" onclick="App.playMediaById('${item.id}')">
+                  <i data-lucide="play" style="width:18px;height:18px;fill:#fff;"></i> Play Now
+                </button>
+                <button class="btn-secondary" onclick="App.openDetail('${item.id}')">
+                  <i data-lucide="info" style="width:18px;height:18px;"></i> More Info
+                </button>
+                <button class="btn-icon-circle" onclick="App.toggleFavorite('${item.id}')" title="Add to My List">
+                  <i data-lucide="${this.favorites.has(item.id) ? 'check' : 'plus'}" style="width:18px;height:18px;"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        dotsContainer.innerHTML = featuredItems.map((_, idx) => `
+          <span class="hero-dot ${idx === 0 ? 'active' : ''}" onclick="App.setHeroSlide(${idx})"></span>
+        `).join('');
+      }
+
+      startHeroCarousel() {
+        clearInterval(this.heroTimer);
+        this.heroTimer = setInterval(() => {
+          const slides = document.querySelectorAll('.hero-slide');
+          if (slides.length <= 1) return;
+          this.heroIndex = (this.heroIndex + 1) % slides.length;
+          this.setHeroSlide(this.heroIndex);
+        }, 5500);
+      }
+
+      setHeroSlide(index) {
+        this.heroIndex = index;
+        document.querySelectorAll('.hero-slide').forEach((slide, i) => {
+          slide.classList.toggle('active', i === index);
+        });
+        document.querySelectorAll('.hero-dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === index);
+        });
+        lucide.createIcons();
+      }
+
+      renderContinueWatching() {
+        const rail = document.getElementById('continue-watching-rail');
+        const section = document.getElementById('continue-watching-section');
+        if (!this.watchHistory.length) {
+          section.style.display = 'none';
+          return;
+        }
+        section.style.display = 'block';
+
+        rail.innerHTML = this.watchHistory.map(item => `
+          <div class="continue-card" onclick="App.playMediaById('${item.contentId}')">
+            <div class="continue-backdrop-wrap">
+              <img src="${item.backdropUrl}" alt="${item.title}">
+              <div class="play-overlay-btn">
+                <div class="play-circle">
+                  <i data-lucide="play" style="width:20px;height:20px;fill:#fff;"></i>
+                </div>
+              </div>
+              <button class="remove-history-btn" onclick="event.stopPropagation(); App.removeContinueWatching('${item.contentId}')" title="Remove">
+                <i data-lucide="x" style="width:14px;height:14px;"></i>
+              </button>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: ${item.progressPercent}%;"></div>
+              </div>
+            </div>
+            <div class="media-info">
+              <div class="media-title">${item.title}</div>
+              <div class="media-subtitle">
+                <span>Resume from ${this.formatTime(item.progressSeconds)}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      renderHorizontalRails() {
+        // Trending
+        const trendingItems = this.catalogue.filter(c => c.trending && c.type !== 'mature');
+        this.populateRail('trending-rail', trendingItems);
+
+        // Popular Movies
+        const movies = this.catalogue.filter(c => c.type === 'movie');
+        this.populateRail('popular-movies-rail', movies);
+
+        // Web Series
+        const series = this.catalogue.filter(c => c.type === 'series');
+        this.populateRail('web-series-rail', series);
+
+        // Anime
+        const anime = this.catalogue.filter(c => c.type === 'anime');
+        this.populateRail('anime-rail', anime);
+
+        // Live Channels
+        const live = this.catalogue.filter(c => c.type === 'live');
+        const liveRail = document.getElementById('live-tv-rail');
+        if (liveRail) {
+          liveRail.innerHTML = live.map(ch => `
+            <div class="live-card" onclick="App.playMediaById('${ch.id}')">
+              <div style="position:relative; width:100%; aspect-ratio:16/9; border-radius:8px; overflow:hidden; background:#000;">
+                <img src="${ch.posterUrl}" style="width:100%; height:100%; object-fit:cover;">
+                <span class="live-badge" style="position:absolute; top:6px; left:6px;">
+                  <span class="live-pulsing-dot"></span> LIVE
+                </span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size:13.5px; font-weight:800;">${ch.title}</div>
+                  <div style="font-size:11.5px; color:var(--text-secondary);">${ch.genres ? ch.genres[0] : 'Broadcast'}</div>
+                </div>
+                <div class="play-circle" style="width:32px; height:32px;">
+                  <i data-lucide="play" style="width:14px; height:14px; fill:#fff;"></i>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        // VIP Exclusive
+        const vipItems = this.catalogue.filter(c => c.vipOnly);
+        this.populateRail('vip-exclusive-rail', vipItems);
+      }
+
+      populateRail(elementId, items) {
+        const container = document.getElementById(elementId);
+        if (!container) return;
+        container.innerHTML = items.map(item => `
+          <div class="media-card" onclick="App.openDetail('${item.id}')">
+            <div class="poster-wrap">
+              <img class="poster-img" src="${item.posterUrl}" alt="${item.title}" loading="lazy">
+              ${item.vipOnly ? '<span class="vip-corner-badge"><i data-lucide="crown" style="width:11px;height:11px;"></i> VIP</span>' : ''}
+              <span class="rating-badge"><i data-lucide="star" style="width:11px;height:11px;fill:#FBBF24;color:#FBBF24;"></i> ${item.rating}</span>
+            </div>
+            <div class="media-info">
+              <div class="media-title">${item.title}</div>
+              <div class="media-subtitle">
+                <span>${item.year}</span>
+                <span>•</span>
+                <span>${item.quality || 'HD'}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      renderSearchResults(items) {
+        const grid = document.getElementById('search-results-grid');
+        if (!grid) return;
+        if (!items.length) {
+          grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align:center; padding: 48px 16px;">
+              <i data-lucide="film" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 12px;"></i>
+              <h4 style="font-size: 16px; font-weight: 700;">No matching cinema found</h4>
+              <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Try searching for another title, actor, or genre.</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = items.map(item => `
+          <div class="media-card" style="flex:auto;" onclick="App.openDetail('${item.id}')">
+            <div class="poster-wrap">
+              <img class="poster-img" src="${item.posterUrl}" alt="${item.title}" loading="lazy">
+              ${item.vipOnly ? '<span class="vip-corner-badge">VIP</span>' : ''}
+              <span class="rating-badge"><i data-lucide="star" style="width:11px;height:11px;fill:#FBBF24;color:#FBBF24;"></i> ${item.rating}</span>
+            </div>
+            <div class="media-info">
+              <div class="media-title">${item.title}</div>
+              <div class="media-subtitle">
+                <span>${item.year}</span>
+                <span>•</span>
+                <span>${item.type.toUpperCase()}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      renderDownloads() {
+        const grid = document.getElementById('downloaded-items-grid');
+        if (!grid) return;
+        if (!this.downloads.length) {
+          grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align:center; padding: 48px 16px;">
+              <i data-lucide="download" style="width: 44px; height: 44px; color: var(--text-muted); margin-bottom: 10px;"></i>
+              <h4 style="font-size: 16px; font-weight: 700;">No Offline Downloads Yet</h4>
+              <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Download movies and episodes to watch while traveling without WiFi.</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = this.downloads.map(d => `
+          <div class="media-card" style="flex:auto;" onclick="App.playMediaById('${d.id}')">
+            <div class="poster-wrap">
+              <img class="poster-img" src="${d.posterUrl}" alt="${d.title}">
+              <span class="tag-badge quality" style="position:absolute; bottom:8px; left:8px;">${d.quality}</span>
+            </div>
+            <div class="media-info">
+              <div class="media-title">${d.title}</div>
+              <div class="media-subtitle">
+                <span style="color:var(--success); font-weight:700;">Downloaded (${d.size})</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      renderUpcoming() {
+        const container = document.getElementById('upcoming-items-container');
+        if (!container) return;
+        const upcoming = this.catalogue.filter(c => c.type === 'upcoming');
+
+        container.innerHTML = upcoming.map(item => `
+          <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--card-shadow);">
+            <div style="position:relative; width:100%; height:220px; background:#000;">
+              <img src="${item.backdropUrl}" style="width:100%; height:100%; object-fit:cover;">
+              <div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.85) 100%);"></div>
+              <span class="tag-badge featured" style="position:absolute; top:12px; left:12px;">PREMIERE COUNTDOWN</span>
+              <div style="position:absolute; bottom:14px; left:16px; color:#fff;">
+                <h3 style="font-size:18px; font-weight:800;">${item.title}</h3>
+                <span style="font-size:13px; color:#E2E8F0;">Release: <strong>${item.releaseDate || 'Late 2026'}</strong></span>
+              </div>
+            </div>
+            <div style="padding:16px; display:flex; justify-content:space-between; align-items:center;">
+              <p style="font-size:13.5px; color:var(--text-secondary); max-width:70%;">${item.overview}</p>
+              <button class="btn-primary" onclick="App.showToast('Reminder set! We will notify you when it premieres.', 'success')">
+                <i data-lucide="bell" style="width:16px;height:16px;"></i> Remind Me
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      renderMature() {
+        const grid = document.getElementById('mature-results-grid');
+        if (!grid) return;
+        const mature = this.catalogue.filter(c => c.type === 'mature');
+        this.populateRail('mature-results-grid', mature);
+      }
+
+      /* ===================================================================
+         MEDIA DETAIL MODAL
+         ===================================================================== */
+      openDetail(contentId) {
+        const item = this.catalogue.find(c => c.id === contentId);
+        if (!item) return;
+
+        this.selectedDetailMedia = item;
+        document.getElementById('detail-backdrop-img').src = item.backdropUrl;
+        document.getElementById('detail-poster-img').src = item.posterUrl;
+        document.getElementById('detail-title').textContent = item.title;
+        document.getElementById('detail-year').textContent = item.year;
+        document.getElementById('detail-runtime').textContent = item.runtime;
+        document.getElementById('detail-rating-pill').innerHTML = `<i data-lucide="star" style="width:13px;height:13px;fill:var(--gold);"></i> ${item.rating}`;
+        document.getElementById('detail-quality-pill').textContent = item.quality || '1080p';
+        document.getElementById('detail-overview').textContent = item.overview;
+        document.getElementById('detail-audio').textContent = item.audio || 'English, Japanese, Spanish';
+        document.getElementById('detail-subs').textContent = item.subtitles || 'English, French, Spanish';
+        document.getElementById('detail-genres').textContent = (item.genres || []).join(', ');
+
+        // Update favorite button state
+        const favIcon = document.getElementById('detail-fav-icon');
+        if (favIcon) {
+          favIcon.setAttribute('data-lucide', this.favorites.has(item.id) ? 'check' : 'plus');
+        }
+
+        // Render Episodes if series/anime
+        const episodesSection = document.getElementById('detail-episodes-section');
+        const episodesList = document.getElementById('episodes-list-container');
+        if (item.episodes && item.episodes.length) {
+          episodesSection.style.display = 'block';
+          episodesList.innerHTML = item.episodes.map(ep => `
+            <div class="episode-card" onclick="App.playEpisode('${item.id}', '${ep.id}')">
+              <div class="episode-thumb-box">
+                <img src="${ep.thumbUrl}" alt="${ep.title}">
+                <div class="episode-play-mini">
+                  <i data-lucide="play" style="width:18px;height:18px;fill:#fff;"></i>
+                </div>
+              </div>
+              <div class="episode-text">
+                <div class="episode-num">Episode ${ep.episodeNum} • ${ep.runtime}</div>
+                <div class="episode-name">${ep.title}</div>
+                <div class="episode-desc">${ep.desc}</div>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          episodesSection.style.display = 'none';
+        }
+
+        // Render Related titles
+        const related = this.catalogue.filter(c => c.id !== item.id && c.type === item.type).slice(0, 5);
+        this.populateRail('detail-related-rail', related);
+
+        document.getElementById('detail-modal').classList.add('active');
+        lucide.createIcons();
+      }
+
+      closeDetailModal() {
+        document.getElementById('detail-modal').classList.remove('active');
+        this.selectedDetailMedia = null;
+      }
+
+      handleOverlayBackdropClick(e) {
+        if (e.target.id === 'detail-modal') {
+          this.closeDetailModal();
+        }
+      }
+
+      /* ===================================================================
+         VIDEO STREAMING & HTML5 / HLS PLAYER ENGINE
+         =================================================================== */
+      playMediaById(contentId) {
+        const item = this.catalogue.find(c => c.id === contentId);
+        if (!item) return;
+
+        // Check VIP gating
+        if (item.vipOnly && !this.userProfile.isVip) {
+          this.showToast("VIP membership required to stream this cinema title.", "warning");
+          this.navigateTo('membership');
+          return;
+        }
+
+        this.startStreaming(item);
+      }
+
+      playCurrentDetailMedia() {
+        if (!this.selectedDetailMedia) return;
+        this.playMediaById(this.selectedDetailMedia.id);
+      }
+
+      playEpisode(seriesId, episodeId) {
+        const series = this.catalogue.find(c => c.id === seriesId);
+        if (!series || !series.episodes) return;
+        const episode = series.episodes.find(e => e.id === episodeId);
+        if (!episode) return;
+
+        const mediaItem = {
+          ...series,
+          title: `${series.title} — ${episode.title}`,
+          streamUrl: episode.streamUrl || series.streamUrl,
+          isEpisode: true
+        };
+        this.startStreaming(mediaItem);
+      }
+
+      startStreaming(mediaItem) {
+        this.currentPlayingMedia = mediaItem;
+        const playerModal = document.getElementById('video-player-modal');
+        const video = document.getElementById('video-element');
+        document.getElementById('player-title').textContent = mediaItem.title;
+        document.getElementById('player-subtitle').textContent = `${mediaItem.quality || '1080p'} • ${mediaItem.audio || 'Stereo'}`;
+
+        const streamUrl = mediaItem.streamUrl;
+
+        // Reset previous player
+        if (this.hlsPlayer) {
+          this.hlsPlayer.destroy();
+          this.hlsPlayer = null;
+        }
+
+        // HLS m3u8 support
+        if (streamUrl.includes('.m3u8') && Hls.isSupported()) {
+          this.hlsPlayer = new Hls();
+          this.hlsPlayer.loadSource(streamUrl);
+          this.hlsPlayer.attachMedia(video);
+          this.hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+            video.play();
+          });
+        } else {
+          video.src = streamUrl;
+          video.play().catch(e => console.log("Autoplay permission notice:", e));
+        }
+
+        playerModal.classList.add('active');
+        this.updatePlayPauseIcon(true);
+        this.recordContinueWatching(mediaItem);
+      }
+
+      closeVideoPlayer() {
+        const playerModal = document.getElementById('video-player-modal');
+        const video = document.getElementById('video-element');
+        video.pause();
+        if (this.hlsPlayer) {
+          this.hlsPlayer.destroy();
+          this.hlsPlayer = null;
+        }
+        playerModal.classList.remove('active');
+      }
+
+      togglePlayPause() {
+        const video = document.getElementById('video-element');
+        if (video.paused) {
+          video.play();
+          this.updatePlayPauseIcon(true);
+        } else {
+          video.pause();
+          this.updatePlayPauseIcon(false);
+        }
+      }
+
+      updatePlayPauseIcon(isPlaying) {
+        const centerIcon = document.getElementById('center-play-icon');
+        const bottomIcon = document.getElementById('bottom-play-icon');
+        const iconName = isPlaying ? 'pause' : 'play';
+        if (centerIcon) centerIcon.setAttribute('data-lucide', iconName);
+        if (bottomIcon) bottomIcon.setAttribute('data-lucide', iconName);
+        lucide.createIcons();
+      }
+
+      playerSeekRelative(seconds) {
+        const video = document.getElementById('video-element');
+        video.currentTime = Math.max(0, Math.min(video.currentTime + seconds, video.duration || 0));
+      }
+
+      toggleMute() {
+        const video = document.getElementById('video-element');
+        video.muted = !video.muted;
+        const volumeIcon = document.getElementById('volume-icon');
+        volumeIcon.setAttribute('data-lucide', video.muted ? 'volume-x' : 'volume-2');
+        lucide.createIcons();
+      }
+
+      setPlaybackSpeed(speed) {
+        const video = document.getElementById('video-element');
+        video.playbackRate = parseFloat(speed);
+        this.showToast(`Playback speed set to ${speed}x`, "info");
+      }
+
+      skipIntro() {
+        const video = document.getElementById('video-element');
+        video.currentTime = 48; // Skip ahead past intro
+        this.showToast("Skipped intro", "info");
+      }
+
+      togglePlayerFullscreen() {
+        const container = document.getElementById('player-container');
+        if (!document.fullscreenElement) {
+          if (container.requestFullscreen) container.requestFullscreen();
+          else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+        }
+      }
+
+      recordContinueWatching(mediaItem) {
+        const existingIdx = this.watchHistory.findIndex(w => w.contentId === mediaItem.id);
+        const record = {
+          contentId: mediaItem.id,
+          title: mediaItem.title,
+          backdropUrl: mediaItem.backdropUrl || mediaItem.posterUrl,
+          progressSeconds: 120,
+          durationSeconds: 720,
+          progressPercent: 25,
+          updatedAt: new Date().toISOString()
+        };
+        if (existingIdx >= 0) this.watchHistory[existingIdx] = record;
+        else this.watchHistory.unshift(record);
+
+        this.renderContinueWatching();
+        this.updateStats();
+
+        // Also persist to Firestore if authenticated
+        if (this.currentUser && fbDb) {
+          try {
+            setDoc(doc(fbDb, `users/${this.currentUser.uid}/continueWatching`, mediaItem.id), record);
+          } catch (err) {
+            console.log("Firestore progress save notice:", err);
+          }
+        }
+      }
+
+      removeContinueWatching(contentId) {
+        this.watchHistory = this.watchHistory.filter(w => w.contentId !== contentId);
+        this.renderContinueWatching();
+        this.updateStats();
+        this.showToast("Removed from continue watching", "info");
+      }
+
+      clearContinueWatching() {
+        this.watchHistory = [];
+        this.renderContinueWatching();
+        this.updateStats();
+        this.showToast("Continue watching cleared", "info");
+      }
+
+      /* ===================================================================
+         FAVORITES / MY LIST
+         =================================================================== */
+      toggleFavorite(contentId) {
+        if (this.favorites.has(contentId)) {
+          this.favorites.delete(contentId);
+          this.showToast("Removed from My List", "info");
+          if (this.currentUser && fbDb) {
+            deleteDoc(doc(fbDb, `users/${this.currentUser.uid}/favorites`, contentId));
+          }
+        } else {
+          this.favorites.add(contentId);
+          this.showToast("Added to My List", "success");
+          if (this.currentUser && fbDb) {
+            setDoc(doc(fbDb, `users/${this.currentUser.uid}/favorites`, contentId), {
+              contentId,
+              addedAt: new Date().toISOString()
+            });
+          }
+        }
+        this.updateStats();
+        this.renderHeroSlides();
+        lucide.createIcons();
+      }
+
+      toggleCurrentDetailFavorite() {
+        if (!this.selectedDetailMedia) return;
+        this.toggleFavorite(this.selectedDetailMedia.id);
+        const favIcon = document.getElementById('detail-fav-icon');
+        if (favIcon) {
+          favIcon.setAttribute('data-lucide', this.favorites.has(this.selectedDetailMedia.id) ? 'check' : 'plus');
+          lucide.createIcons();
+        }
+      }
+
+      openFavoritesModal() {
+        const favItems = this.catalogue.filter(c => this.favorites.has(c.id));
+        this.navigateTo('search');
+        this.renderSearchResults(favItems);
+        this.showToast(`Displaying ${favItems.length} titles in My List`, "info");
+      }
+
+      /* ===================================================================
+         DOWNLOADS MANAGEMENT
+         =================================================================== */
+      downloadCurrentDetailMedia() {
+        if (!this.selectedDetailMedia) return;
+        const item = this.selectedDetailMedia;
+
+        if (this.downloads.find(d => d.id === item.id)) {
+          this.showToast("Title is already in offline downloads", "info");
+          return;
+        }
+
+        this.showToast(`Downloading "${item.title}"...`, "info");
+        setTimeout(() => {
+          this.downloads.push({
+            id: item.id,
+            title: item.title,
+            size: "1.1 GB",
+            quality: item.quality || "1080p",
+            posterUrl: item.posterUrl,
+            streamUrl: item.streamUrl
+          });
+          this.renderDownloads();
+          this.updateStats();
+          this.showToast(`Download complete: "${item.title}" ready offline!`, "success");
+        }, 1200);
+      }
+
+      shareCurrentDetailMedia() {
+        if (!this.selectedDetailMedia) return;
+        const shareData = {
+          title: this.selectedDetailMedia.title,
+          text: `Watch ${this.selectedDetailMedia.title} on MRFlix OTT Platform!`,
+          url: window.location.href
+        };
+        if (navigator.share) {
+          navigator.share(shareData).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(window.location.href);
+          this.showToast("Stream link copied to clipboard!", "success");
+        }
+      }
+
+      watchTrailer() {
+        if (!this.selectedDetailMedia) return;
+        this.startStreaming(this.selectedDetailMedia);
+      }
+
+      reportPlaybackIssue() {
+        const report = prompt("Please describe the playback problem (e.g. buffering, audio out of sync):", "Video buffering");
+        if (report) {
+          this.showToast("Thank you! Playback report received by MRFlix engineers.", "success");
+        }
+      }
+
+      /* ===================================================================
+         SEARCH SYSTEM & TMDB EXPLORER
+         =================================================================== */
+      executeSearch(query) {
+        if (!query) {
+          this.renderSearchResults(this.catalogue);
+          return;
+        }
+        const q = query.toLowerCase();
+        const results = this.catalogue.filter(item => 
+          item.title.toLowerCase().includes(q) ||
+          (item.genres && item.genres.some(g => g.toLowerCase().includes(q))) ||
+          (item.overview && item.overview.toLowerCase().includes(q))
+        );
+        this.renderSearchResults(results);
+      }
+
+      clearSearch() {
+        const input = document.getElementById('main-search-input');
+        input.value = '';
+        document.getElementById('search-clear-btn').style.display = 'none';
+        this.renderSearchResults(this.catalogue);
+      }
+
+      switchSearchMode(mode) {
+        document.querySelectorAll('.search-subtab').forEach(t => t.classList.remove('active'));
+        if (mode === 'tmdb') {
+          document.querySelectorAll('.search-subtab')[1].classList.add('active');
+          this.showToast("TMDB Global Metadata Explorer active. Search any movie in the world!", "info");
+        } else {
+          document.querySelectorAll('.search-subtab')[0].classList.add('active');
+          this.renderSearchResults(this.catalogue);
+        }
+      }
+
+      filterSearchResult(genre) {
+        document.querySelectorAll('#view-search .chip-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        if (genre === 'all') {
+          this.renderSearchResults(this.catalogue);
+        } else {
+          const filtered = this.catalogue.filter(c => c.genres && c.genres.includes(genre));
+          this.renderSearchResults(filtered);
+        }
+      }
+
+      filterHomeCategory(cat) {
+        document.querySelectorAll('#view-home .chip-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        if (cat === 'all') {
+          this.renderHorizontalRails();
+        } else if (cat === 'vip') {
+          this.navigateTo('membership');
+        } else {
+          this.openCategoryGrid(cat);
+        }
+      }
+
+      openCategoryGrid(type) {
+        this.navigateTo('search');
+        const items = this.catalogue.filter(c => c.type === type);
+        this.renderSearchResults(items);
+      }
+
+      /* ===================================================================
+         MEMBERSHIP, VIP UPGRADE & REDEEM CODES
+         =================================================================== */
+      selectPlan(planTier) {
+        if (planTier === 'free') {
+          this.userProfile.plan = 'free';
+          this.userProfile.isVip = false;
+          this.showToast("Switched to Basic Free tier.", "info");
+        } else {
+          this.userProfile.plan = planTier;
+          this.userProfile.isVip = true;
+          this.userProfile.vipExpires = "Dec 2026";
+          this.showToast(`Upgraded to ${planTier.toUpperCase()} VIP! 4K Ultra HD unlocked.`, "success");
+
+          // Save payment request in Firestore for admin verification
+          if (this.currentUser && fbDb) {
+            addDoc(collection(fbDb, "paymentRequests"), {
+              userId: this.currentUser.uid,
+              userEmail: this.currentUser.email,
+              plan: planTier,
+              status: "approved",
+              createdAt: serverTimestamp()
+            });
+          }
+        }
+        this.updateAuthUI();
+      }
+
+      openRedeemModal() {
+        document.getElementById('redeem-modal').classList.add('active');
+      }
+
+      closeRedeemModal() {
+        document.getElementById('redeem-modal').classList.remove('active');
+      }
+
+      redeemFromMembership() {
+        const code = document.getElementById('membership-redeem-input').value.trim();
+        this.applyRedeemCode(code);
+      }
+
+      processRedeemCode() {
+        const code = document.getElementById('modal-redeem-input').value.trim();
+        this.applyRedeemCode(code);
+      }
+
+      applyRedeemCode(code) {
+        if (!code) {
+          this.showToast("Please enter a valid redeem code", "warning");
+          return;
+        }
+
+        const upper = code.toUpperCase();
+        if (upper === 'MRFLIX-VIP30' || upper === 'PREMIUM100' || upper === 'FREETRIAL' || upper === 'WELCOME') {
+          this.userProfile.isVip = true;
+          this.userProfile.plan = 'vip';
+          this.userProfile.vipExpires = "Dec 2026";
+          this.closeRedeemModal();
+          this.updateAuthUI();
+          this.showToast(`🎉 Code "${upper}" Redeemed! 30 Days of VIP Premium Activated!`, "success");
+        } else {
+          this.showToast("Invalid or expired code. Please verify with Admin.", "danger");
+        }
+      }
+
+      /* ===================================================================
+         USER PROFILE & AUTHENTICATION
+         =================================================================== */
+      onUserAvatarClick() {
+        if (this.currentUser) {
+          this.navigateTo('profile');
+        } else {
+          this.openAuthModal();
+        }
+      }
+
+      openAuthModal() {
+        document.getElementById('auth-modal').classList.add('active');
+      }
+
+      closeAuthModal() {
+        document.getElementById('auth-modal').classList.remove('active');
+      }
+
+      handleAuthModalBackdrop(e) {
+        if (e.target.id === 'auth-modal') this.closeAuthModal();
+      }
+
+      toggleAuthMode() {
+        this.authMode = this.authMode === 'login' ? 'register' : 'login';
+        const isReg = this.authMode === 'register';
+        document.getElementById('auth-modal-title').textContent = isReg ? 'Create MRFlix Account' : 'Welcome to MRFlix';
+        document.getElementById('auth-modal-subtitle').textContent = isReg ? 'Start streaming in 4K HDR today' : 'Sign in to access your Watchlist & VIP benefits';
+        document.getElementById('auth-name-group').style.display = isReg ? 'flex' : 'none';
+        document.getElementById('auth-submit-btn').textContent = isReg ? 'Create Account' : 'Sign In';
+        document.getElementById('auth-switch-prompt').textContent = isReg ? 'Already have an account?' : "Don't have an account?";
+        document.getElementById('auth-switch-link').textContent = isReg ? 'Sign In' : 'Sign Up';
+      }
+
+      async handleAuthSubmit(e) {
+        e.preventDefault();
+        const email = document.getElementById('auth-input-email').value;
+        const password = document.getElementById('auth-input-password').value;
+        const name = document.getElementById('auth-input-name').value;
+
+        if (!isFirebaseConnected || !fbAuth) {
+          // Local fallback simulation
+          this.userProfile.email = email;
+          this.userProfile.displayName = name || email.split('@')[0];
+          this.currentUser = { email, uid: "mock-uid-123" };
+          this.closeAuthModal();
+          this.updateAuthUI();
+          this.showToast(`Signed in as ${this.userProfile.displayName}`, "success");
+          return;
+        }
+
+        try {
+          if (this.authMode === 'register') {
+            const userCred = await createUserWithEmailAndPassword(fbAuth, email, password);
+            if (name) {
+              await updateProfile(userCred.user, { displayName: name });
+            }
+            this.showToast("Account created successfully! Welcome to MRFlix.", "success");
+          } else {
+            await signInWithEmailAndPassword(fbAuth, email, password);
+            this.showToast("Signed in successfully!", "success");
+          }
+          this.closeAuthModal();
+        } catch (err) {
+          this.showToast(err.message || "Authentication error", "danger");
+        }
+      }
+
+      loginDemoAccount() {
+        this.currentUser = { email: "toxicbossmr@gmail.com", uid: "demo-user-vip" };
+        this.userProfile.displayName = "Toxic Boss";
+        this.userProfile.email = "toxicbossmr@gmail.com";
+        this.userProfile.isVip = true;
+        this.closeAuthModal();
+        this.updateAuthUI();
+        this.showToast("Signed in as Demo VIP Account!", "success");
+      }
+
+      handleAuthAction() {
+        if (confirm("Are you sure you want to sign out?")) {
+          if (fbAuth && this.currentUser) {
+            signOut(fbAuth);
+          }
+          this.currentUser = null;
+          this.updateAuthUI();
+          this.showToast("Signed out successfully", "info");
+          this.navigateTo('home');
+        }
+      }
+
+      openAvatarPicker() {
+        const avatars = [
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+          "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
+          "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=200&auto=format&fit=crop&q=80",
+          "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80"
+        ];
+        const next = avatars[(Math.floor(Math.random() * avatars.length))];
+        this.userProfile.photoUrl = next;
+        this.updateAuthUI();
+        this.showToast("Avatar updated!", "success");
+      }
+
+      openEditProfileModal() {
+        const newName = prompt("Enter new display name:", this.userProfile.displayName);
+        if (newName && newName.trim()) {
+          this.userProfile.displayName = newName.trim();
+          this.updateAuthUI();
+          this.showToast("Display name updated!", "success");
+        }
+      }
+
+      updateAuthUI() {
+        document.getElementById('top-avatar-img').src = this.userProfile.photoUrl;
+        document.getElementById('profile-page-avatar').src = this.userProfile.photoUrl;
+        document.getElementById('profile-page-name').textContent = this.userProfile.displayName;
+        document.getElementById('profile-page-email').textContent = this.userProfile.email;
+
+        const vipBtnText = document.getElementById('vip-btn-text');
+        const profileVipTag = document.getElementById('profile-vip-tag');
+
+        if (this.userProfile.isVip) {
+          vipBtnText.textContent = "VIP Active";
+          profileVipTag.textContent = "VIP Active";
+          profileVipTag.style.display = 'inline-block';
+        } else {
+          vipBtnText.textContent = "Upgrade VIP";
+          profileVipTag.style.display = 'none';
+        }
+      }
+
+      updateStats() {
+        document.getElementById('stat-favorites-count').textContent = this.favorites.size;
+        document.getElementById('stat-history-count').textContent = this.watchHistory.length;
+        document.getElementById('stat-download-count').textContent = this.downloads.length;
+      }
+
+      /* ===================================================================
+         CHAT & HELP DESK
+         =================================================================== */
+      sendChatMessage() {
+        const input = document.getElementById('chat-user-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const container = document.getElementById('support-chat-container');
+        // Add user bubble
+        container.innerHTML += `
+          <div class="chat-bubble outgoing">${this.escapeHtml(text)}</div>
+        `;
+        input.value = '';
+        container.scrollTop = container.scrollHeight;
+
+        // Auto-reply assistant logic
+        setTimeout(() => {
+          let reply = "Our support engineers have received your inquiry. For immediate VIP activation, you can enter voucher code MRFLIX-VIP30.";
+          if (text.toLowerCase().includes('download')) {
+            reply = "You can download any movie or web series for offline playback using the Download button on the movie detail page!";
+          } else if (text.toLowerCase().includes('buffering') || text.toLowerCase().includes('slow')) {
+            reply = "If experiencing buffering, try switching video quality to 720p or checking your WiFi network stability.";
+          }
+          container.innerHTML += `
+            <div class="chat-bubble incoming">${reply}</div>
+          `;
+          container.scrollTop = container.scrollHeight;
+        }, 800);
+      }
+
+      /* ===================================================================
+         NOTIFICATIONS
+         =================================================================== */
+      openNotificationsModal() {
+        const container = document.getElementById('notifications-list-container');
+        container.innerHTML = this.notifications.map(n => `
+          <div style="background:var(--surface-secondary); padding:12px; border-radius:12px; border:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong style="font-size:13.5px;">${n.title}</strong>
+              <span style="font-size:11px; color:var(--text-muted);">${n.time}</span>
+            </div>
+            <p style="font-size:12.5px; color:var(--text-secondary); margin-top:4px;">${n.message}</p>
+          </div>
+        `).join('');
+        document.getElementById('notifications-modal').classList.add('active');
+        document.getElementById('unread-notifications-count').style.display = 'none';
+      }
+
+      closeNotificationsModal() {
+        document.getElementById('notifications-modal').classList.remove('active');
+      }
+
+      updateNotificationsBadge() {
+        const unread = this.notifications.filter(n => n.unread).length;
+        const badge = document.getElementById('unread-notifications-count');
+        if (unread > 0) {
+          badge.textContent = unread;
+          badge.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+
+      /* ===================================================================
+         ADMIN SYNC & SEED HELPER
+         =================================================================== */
+      openAdminSyncHelper() {
+        document.getElementById('admin-sync-modal').classList.add('active');
+      }
+
+      closeAdminSyncModal() {
+        document.getElementById('admin-sync-modal').classList.remove('active');
+      }
+
+      async seedFirestoreDemoData() {
+        if (!isFirebaseConnected || !fbDb) {
+          this.showToast("Firebase is currently in local offline mode", "warning");
+          return;
+        }
+
+        try {
+          this.showToast("Seeding demo movies to Firestore...", "info");
+          for (const item of SEED_CATALOGUE) {
+            await setDoc(doc(fbDb, "movies", item.id), item);
+          }
+          this.showToast("All sample movies successfully seeded to Firestore!", "success");
+          this.closeAdminSyncModal();
+        } catch (err) {
+          this.showToast("Firestore seed notice: " + err.message, "danger");
+        }
+      }
+
+      reconnectFirebase() {
+        this.initFirebaseListeners();
+        this.showToast("Reconnecting real-time Firestore listeners...", "info");
+        this.closeAdminSyncModal();
+      }
+
+      /* ===================================================================
+         UTILITIES & TOASTS
+         =================================================================== */
+      showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast-item';
+        let icon = 'info';
+        if (type === 'success') icon = 'check-circle';
+        if (type === 'warning') icon = 'alert-triangle';
+        if (type === 'danger') icon = 'alert-circle';
+
+        toast.innerHTML = `<i data-lucide="${icon}" style="width:16px;height:16px;"></i> <span>${this.escapeHtml(message)}</span>`;
+        container.appendChild(toast);
+        lucide.createIcons();
+
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transition = 'opacity 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }, 3200);
+      }
+
+      formatTime(seconds) {
+        if (isNaN(seconds)) return "00:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }
+
+      escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+    }
+
+    // Initialize Global App instance
+    window.App = new MRFlixApp();
+    window.addEventListener('DOMContentLoaded', () => {
+      window.App.init();
+    });
+  </script>
+</body>
+</html>
